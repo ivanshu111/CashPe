@@ -1,0 +1,49 @@
+# Sample cURL commands to test the authentication endpoints
+
+# Endpoint: /api/auth/register
+# Method: POST
+# Description: Register a new user.
+# Required fields: name, email, password, phone
+
+curl -X POST http://localhost:3000/api/auth/register \
+-H "Content-Type: application/json" \
+-d '{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "password": "password123",
+  "phone": "1234567890"
+}'
+
+echo ""
+echo "--------------------------------------------------------------------"
+echo ""
+
+# Endpoint: /api/auth/login
+# Method: POST
+# Description: Log in an existing user.
+# Required fields: email, password
+
+curl -X POST http://localhost:3000/api/auth/login \
+-H "Content-Type: application/json" \
+-d '{
+  "email": "john.doe@example.com",
+  "password": "password123"
+}'
+
+echo ""
+echo "--------------------------------------------------------------------"
+echo ""
+
+# Endpoint: /api/wallet/balance
+# Method: GET
+# Description: Get the balance of the logged-in user's wallet.
+# Authorization: Bearer Token (obtained from /api/auth/login)
+# Postman Instructions:
+# 1. After logging in via /api/auth/login, copy the 'token' from the response.
+# 2. Open a new request tab in Postman.
+# 3. Set the method to GET.
+# 4. Enter the URL: http://localhost:3000/api/wallet/balance
+# 5. Go to the 'Authorization' tab, select type 'Bearer Token'.
+# 6. Paste the copied token into the 'Token' field.
+# 7. Send the request.
+# Expected Response: {"balance": 0} (or the current balance of the user's wallet)
