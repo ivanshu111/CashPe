@@ -6,20 +6,19 @@ const walletRoutes = require("./routes/walletRoutes");
 const helmet = require("helmet");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
-const fs = require('fs');
+const fs = require("fs");
 const app = express();
 
 let PORT = 3000;
 try {
-  const envFile = fs.readFileSync('.env', 'utf8');
-  const portLine = envFile.split('\n').find(line => line.startsWith('PORT='));
+  const envFile = fs.readFileSync(".env", "utf8");
+  const portLine = envFile.split("\n").find((line) => line.startsWith("PORT="));
   if (portLine) {
-    PORT = parseInt(portLine.split('=')[1].replace(';', '').trim(), 10);
+    PORT = parseInt(portLine.split("=")[1].replace(";", "").trim(), 10);
   }
 } catch (err) {
-  console.log('Could not read .env file, using default port 3000');
+  console.log("Could not read .env file, using default port 3000");
 }
-
 
 // Rate limiting
 const limiter = rateLimit({
@@ -37,10 +36,11 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/wallet", walletRoutes);
 
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send('Something broke!');
+  res.status(500).send("Something broke!");
 });
 
 connectDB()

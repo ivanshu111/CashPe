@@ -47,3 +47,28 @@ echo ""
 # 6. Paste the copied token into the 'Token' field.
 # 7. Send the request.
 # Expected Response: {"balance": 0} (or the current balance of the user's wallet)
+
+echo ""
+echo "--------------------------------------------------------------------"
+echo ""
+
+# Endpoint: /api/wallet/send-money
+# Method: POST
+# Description: Send money from the logged-in user's wallet to another user's wallet.
+# Authorization: Bearer Token (obtained from /api/auth/login - sender's token)
+# Required fields in body: toUser (recipient's user ID), amount
+
+# Instructions for testing sendMoney:
+# 1. Register two users (e.g., User A and User B) using the /api/auth/register endpoint.
+# 2. Log in User A and copy their token (SENDER_TOKEN).
+# 3. Log in User B and note down their User ID (RECIPIENT_USER_ID). You can get this from the database or by creating a temporary API to list users.
+# 4. (Optional) Add some money to User A's wallet using /api/wallet/add-money (if implemented) or manually adjust their balance in the database, to ensure they have sufficient funds.
+# 5. Use the following cURL command to send money from User A to User B:
+
+curl -X POST http://localhost:3000/api/wallet/send-money \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer <SENDER_TOKEN>" \
+-d '{
+  "toUser": "<RECIPIENT_USER_ID>",
+  "amount": 10
+}'

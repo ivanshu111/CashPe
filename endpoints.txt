@@ -1,0 +1,9 @@
+Authentication Endpoints:
+  POST /register
+  POST /login
+
+Wallet & Transaction Endpoints:
+  GET /balance
+  GET /details
+  POST /add-money
+  POST /send-money

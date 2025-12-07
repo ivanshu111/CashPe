@@ -12,7 +12,7 @@ const transactionSchema = new mongoose.Schema(
       enum: ["credit", "debit"],
       required: true,
     },
-    amout: {
+    amount: {
       type: Number,
       required: true,
     },
