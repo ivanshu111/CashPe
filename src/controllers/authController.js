@@ -66,4 +66,34 @@ const loginUser = async (req, res, next) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+module.exports = { registerUser, loginUser, updateUserProfile };
+
+const updateUserProfile = async (req, res, next) => {
+  try {
+    const { name, password, phone } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (name) {
+      user.name = name;
+    }
+    if (phone) {
+      user.phone = phone;
+    }
+    if (password) {
+      const hashedPassword = await hashPassword(password);
+      user.password = hashedPassword;
+    }
+
+    await user.save();
+
+    res.status(200).json({ message: "Profile updated successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
