@@ -23,3 +23,29 @@ This document outlines the core functionalities of the CashPe application.
 - **Protected Routes:** User-specific and admin-specific endpoints are protected by authentication middleware, ensuring only authorized users can access them.
 - **Account Status Control:** The 'inactive' status is used to block key financial transactions (sending/adding money), providing a mechanism for account suspension.
 - **Rate Limiting:** Basic rate limiting is implemented to protect the application against brute-force attacks.
+
+### Recommended Features
+
+Here are some suggested features to enhance the application, categorized for clarity.
+
+#### Core User Features
+- **Personal Transaction History:** Allow users to view a list of their own incoming and outgoing transactions. This is a crucial feature for users to track their financial activity.
+- **Request Money:** Enable users to send a payment request to another user. The recipient of the request can then approve or deny the payment. This would require a new "requests" system.
+- **User Search:** Implement a feature for users to find other users by their email or phone number, making it easier to initiate transactions without knowing a user's internal ID.
+
+#### Notifications
+- **In-App Notifications:** Create a simple notification system to inform users of important events, such as:
+  - "You have received money from [User]."
+  - "Your payment to [User] was successful."
+  - "You have a new payment request from [User]."
+  - "Your account has been frozen/unfrozen by an administrator."
+
+#### Enhanced Security
+- **Transaction PIN:** Introduce a 4-digit PIN that is required before any `sendMoney` or `addMoney` transaction is confirmed. This adds a second layer of security separate from the user's login password.
+- **Two-Factor Authentication (2FA):** For a significant security upgrade, implement 2FA (e.g., using an authenticator app) for the login process.
+- **Password Strength Meter:** On the registration and profile update pages, provide visual feedback on the strength of the user's chosen password.
+
+#### Admin & Automation
+- **Scheduled Account Reactivation:** Implement the previously discussed feature where an admin can freeze an account for a specific duration (e.g., 7 days). The system would then automatically reactivate the account after that period. This requires adding a `reactivationDate` field to the User model and creating a scheduled job to check for accounts to reactivate.
+- **Admin Dashboard:** Create a dashboard for admins that shows key application metrics at a glance (e.g., number of registered users, total transaction volume, number of inactive accounts).
+- **Manual Transaction Review:** Add a feature for admins to flag suspicious transactions for manual review.
