@@ -11,7 +11,7 @@ const verifyPin = require("../middlewares/verifyPin"); // Import verifyPin middl
 
 router.get("/balance", auth, verifyPin, getBalance);
 router.get("/details", auth, verifyPin, getWalletDetails);
-router.post("/add-money", auth, verifyPin, addMoney);
+router.post("/add-money", auth, addMoney);
 router.post("/send-money", auth, verifyPin, sendMoney); // Add sendMoney route
 
 module.exports = router;

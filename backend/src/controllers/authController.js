@@ -54,11 +54,11 @@ const loginUser = async (req, res, next) => {
     }
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({ message: "User not found" });
     }
     const isMatch = await comparePassword(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({ message: "Incorrect password" });
     }
     const token = generateToken({ userId: user._id });
     res.status(200).json({ token, message: "User logged in successfully" });

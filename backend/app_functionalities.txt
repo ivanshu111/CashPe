@@ -29,7 +29,7 @@ This document outlines the core functionalities of the CashPe application.
 Here are some suggested features to enhance the application, categorized for clarity.
 
 #### Core User Features
-- **Personal Transaction History:** Allow users to view a list of their own incoming and outgoing transactions. This is a crucial feature for users to track their financial activity.
+- **Personal Transaction History:** Allow users to view a list of their own incoming and outgoing transactions. This is a crucial feature for users to track their financial activity.✅✅✅
 - **Request Money:** Enable users to send a payment request to another user. The recipient of the request can then approve or deny the payment. This would require a new "requests" system.
 - **User Search:** Implement a feature for users to find other users by their email or phone number, making it easier to initiate transactions without knowing a user's internal ID.
 
@@ -41,7 +41,7 @@ Here are some suggested features to enhance the application, categorized for cla
   - "Your account has been frozen/unfrozen by an administrator."
 
 #### Enhanced Security
-- **Transaction PIN:** Introduce a 4-digit PIN that is required before any `sendMoney` or `addMoney` transaction is confirmed. This adds a second layer of security separate from the user's login password.
+- **Transaction PIN:** Introduce a 4-digit PIN that is required before any `sendMoney` or `addMoney` transaction is confirmed. This adds a second layer of security separate from the user's login password.✅✅✅
 - **Two-Factor Authentication (2FA):** For a significant security upgrade, implement 2FA (e.g., using an authenticator app) for the login process.
 - **Password Strength Meter:** On the registration and profile update pages, provide visual feedback on the strength of the user's chosen password.
 
