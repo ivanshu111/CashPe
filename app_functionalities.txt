@@ -1,0 +1,25 @@
+This document outlines the core functionalities of the CashPe application.
+
+### User Account Management
+- **User Registration:** New users can create an account with their name, email, password, and phone number.
+- **User Login:** Registered users can log in using their email and password to receive an authentication token.
+- **Profile Updates:** Authenticated users can update their own profile information, including their name, phone number, and password.
+
+### Wallet & Transactions
+- **View Wallet Balance:** Authenticated users can check their current wallet balance.
+- **View Wallet Details:** Users can retrieve their wallet details, which includes their name, balance, and the date the wallet was created.
+- **Add Money:** Users can add money to their own wallet. This action is blocked if the user's account is inactive.
+- **Send Money:** Users can send money from their wallet to another user's wallet. This action is blocked if either the sender's or the receiver's account is inactive.
+
+### Admin Panel
+- **Authentication:** All admin routes are protected and require an administrator account token.
+- **View All Users:** Admins can retrieve a complete list of all users in the system.
+- **View All Transactions:** Admins can view a complete history of all transactions that have occurred on the platform.
+- **Freeze/Deactivate User Account:** Admins can "freeze" a user's account, which sets their status to 'inactive', preventing them from performing transactions.
+- **Unfreeze/Activate User Account:** Admins can "unfreeze" an inactive account, setting its status back to 'active'.
+
+### Security Features
+- **Password Hashing:** User passwords are securely hashed before being stored in the database.
+- **Protected Routes:** User-specific and admin-specific endpoints are protected by authentication middleware, ensuring only authorized users can access them.
+- **Account Status Control:** The 'inactive' status is used to block key financial transactions (sending/adding money), providing a mechanism for account suspension.
+- **Rate Limiting:** Basic rate limiting is implemented to protect the application against brute-force attacks.
