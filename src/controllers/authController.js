@@ -11,8 +11,8 @@ const registerUser = async (req, res, next) => {
   }
 
   try {
-    const { name, email, password, phone } = req.body;
-    if (!name || !email || !password || !phone) {
+    const { name, email, password, phone, pin } = req.body;
+    if (!name || !email || !password || !phone || !pin) {
       return res.status(400).json({ message: "All fields are required" });
     }
     const existingUser = await User.findOne({ email });
@@ -25,6 +25,7 @@ const registerUser = async (req, res, next) => {
       email,
       password: hashedPassword,
       phone,
+      pin,
     });
 
     //create wallet for user
@@ -68,7 +69,7 @@ const loginUser = async (req, res, next) => {
 
 const updateUserProfile = async (req, res, next) => {
   try {
-    const { name, password, phone } = req.body;
+    const { name, password, phone, pin } = req.body;
     const userId = req.user.id;
 
     const user = await User.findById(userId);
@@ -86,6 +87,9 @@ const updateUserProfile = async (req, res, next) => {
     if (password) {
       const hashedPassword = await hashPassword(password);
       user.password = hashedPassword;
+    }
+    if (pin) {
+      user.pin = pin;
     }
 
     await user.save();
