@@ -1,15 +1,109 @@
-Authentication Endpoints:
-  POST /register
-  POST /login
+To test the `PATCH /api/auth/profile` endpoint, follow these steps:
 
-Wallet & Transaction Endpoints:
-  GET /balance
-  GET /details
-  POST /add-money
-  POST /send-money
+**Prerequisites:**
+1.  A running instance of the application.
+2.  Access to the database to verify user profile changes.
+3.  An existing "regular" user with a valid authentication token.
 
-Admin Endpoints:
-  GET /api/admin/users
-  GET /api/admin/transactions
-  PUT /api/admin/user/:userId/freeze
-  PUT /api/admin/user/:userId/unfreeze
+**Test Cases:**
+
+**Test Case 1: Successfully update user's name**
+1.  **Obtain User Token:** Log in as a regular user to get an authentication token.
+2.  **Send Request:**
+    *   **Method:** `PATCH`
+    *   **URL:** `/api/auth/profile`
+    *   **Headers:**
+        *   `Authorization: Bearer <user_token>`
+        *   `Content-Type: application/json`
+    *   **Body:**
+        ```json
+        {
+            "name": "Jane Doe Updated"
+        }
+        ```
+3.  **Verify Response:**
+    *   **Status Code:** Expect `200 OK`
+    *   **Body:** Expect a success message, e.g., `{"message": "Profile updated successfully"}`.
+4.  **Verify Database:** Check the database to confirm that the user's `name` has been updated to "Jane Doe Updated".
+
+**Test Case 2: Successfully update user's phone number**
+1.  **Obtain User Token:** Log in as a regular user to get an authentication token.
+2.  **Send Request:**
+    *   **Method:** `PATCH`
+    *   **URL:** `/api/auth/profile`
+    *   **Headers:**
+        *   `Authorization: Bearer <user_token>`
+        *   `Content-Type: application/json`
+    *   **Body:**
+        ```json
+        {
+            "phone": "9876543210"
+        }
+        ```
+3.  **Verify Response:**
+    *   **Status Code:** Expect `200 OK`
+    *   **Body:** Expect a success message.
+4.  **Verify Database:** Check the database to confirm that the user's `phone` has been updated to "9876543210".
+
+**Test Case 3: Successfully update user's password**
+1.  **Obtain User Token:** Log in as a regular user to get an authentication token.
+2.  **Send Request:**
+    *   **Method:** `PATCH`
+    *   **URL:** `/api/auth/profile`
+    *   **Headers:**
+        *   `Authorization: Bearer <user_token>`
+        *   `Content-Type: application/json`
+    *   **Body:**
+        ```json
+        {
+            "password": "newStrongPassword123"
+        }
+        ```
+3.  **Verify Response:**
+    *   **Status Code:** Expect `200 OK`
+    *   **Body:** Expect a success message.
+4.  **Verify Database:** Check the database to confirm that the user's `password` has been updated (it will be hashed, so you'll need to attempt to log in with the new password to confirm it works, or verify the hash is different).
+
+**Test Case 4: Successfully update multiple fields (name and phone)**
+1.  **Obtain User Token:** Log in as a regular user to get an authentication token.
+2.  **Send Request:**
+    *   **Method:** `PATCH`
+    *   **URL:** `/api/auth/profile`
+    *   **Headers:**
+        *   `Authorization: Bearer <user_token>`
+        *   `Content-Type: application/json`
+    *   **Body:**
+        ```json
+        {
+            "name": "Alice Wonderland",
+            "phone": "1122334455"
+        }
+        ```
+3.  **Verify Response:**
+    *   **Status Code:** Expect `200 OK`
+    *   **Body:** Expect a success message.
+4.  **Verify Database:** Check the database to confirm that both the `name` and `phone` have been updated.
+
+**Test Case 5: Attempt to update without a token (Unauthorized)**
+1.  **Send Request:**
+    *   **Method:** `PATCH`
+    *   **URL:** `/api/auth/profile`
+    *   **Headers:**
+        *   `Content-Type: application/json`
+    *   **Body:** (Any valid update data, e.g., `{"name": "Unauthorized User"}`)
+5.  **Verify Response:**
+    *   **Status Code:** Expect `401 Unauthorized`
+    *   **Body:** Expect an unauthorized message, e.g., `{"message": "Unauthorized"}`.
+
+**Test Case 6: Attempt to update with an invalid token (Unauthorized)**
+1.  **Use Invalid Token:** Provide a malformed or expired JWT token.
+2.  **Send Request:**
+    *   **Method:** `PATCH`
+    *   **URL:** `/api/auth/profile`
+    *   **Headers:**
+        *   `Authorization: Bearer <invalid_token>`
+        *   `Content-Type: application/json`
+    *   **Body:** (Any valid update data)
+5.  **Verify Response:**
+    *   **Status Code:** Expect `401 Unauthorized`
+    *   **Body:** Expect an unauthorized message.
