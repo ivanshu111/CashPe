@@ -66,8 +66,6 @@ const loginUser = async (req, res, next) => {
   }
 };
 
-module.exports = { registerUser, loginUser, updateUserProfile };
-
 const updateUserProfile = async (req, res, next) => {
   try {
     const { name, password, phone } = req.body;
@@ -97,3 +95,5 @@ const updateUserProfile = async (req, res, next) => {
     next(error);
   }
 };
+
+module.exports = { registerUser, loginUser, updateUserProfile };
