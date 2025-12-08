@@ -40,7 +40,7 @@ exports.freezeUserAccount = async (req, res) => {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    user.status = "frozen"; // Assuming 'frozen' is a valid status
+    user.status = "inactive"; // Set status to 'inactive'
     await user.save();
 
     res.json({ msg: `User ${user.email} account has been frozen.` });
