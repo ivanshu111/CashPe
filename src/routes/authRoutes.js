@@ -6,6 +6,7 @@ const {
   registerUser,
   loginUser,
   updateUserProfile,
+  getTransactionHistory,
 } = require("../controllers/authController");
 const auth = require("../middlewares/auth");
 

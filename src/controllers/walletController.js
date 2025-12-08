@@ -48,10 +48,7 @@ exports.addMoney = async (req, res, next) => {
     await wallet.save();
     res
       .status(200)
-      .json(
-        { balance: wallet.balance },
-        { message: "Money added successfully" }
-      );
+      .json({ balance: wallet.balance, message: "Money added successfully" });
   } catch (error) {
     next(error);
   }
