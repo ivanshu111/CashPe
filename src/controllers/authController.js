@@ -9,7 +9,7 @@ const registerUser = async (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  console.log("Inside registerUser controller function.");
+
   try {
     const { name, email, password, phone } = req.body;
     if (!name || !email || !password || !phone) {
@@ -96,4 +96,27 @@ const updateUserProfile = async (req, res, next) => {
   }
 };
 
-module.exports = { registerUser, loginUser, updateUserProfile };
+const Transaction = require("../models/Transaction");
+
+const getTransactionHistory = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const transactions = await Transaction.find({
+      $or: [{ fromUser: userId }, { toUser: userId }],
+    })
+      .sort({ createdAt: -1 })
+      .populate("fromUser", "name email")
+      .populate("toUser", "name email");
+
+    res.status(200).json({ transactions });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  registerUser,
+  loginUser,
+  updateUserProfile,
+  getTransactionHistory,
+};

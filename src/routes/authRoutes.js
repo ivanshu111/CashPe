@@ -2,11 +2,14 @@ const express = require("express");
 const router = express.Router();
 const { check } = require("express-validator");
 console.log("Auth Routes loaded.");
-const { registerUser, loginUser, updateUserProfile } = require("../controllers/authController");
+const {
+  registerUser,
+  loginUser,
+  updateUserProfile,
+} = require("../controllers/authController");
 const auth = require("../middlewares/auth");
 
 router.patch("/profile", auth, updateUserProfile);
-
 
 router.post(
   "/register",
@@ -27,5 +30,7 @@ router.post(
   ],
   loginUser
 );
+
+router.get("/history", auth, getTransactionHistory);
 
 module.exports = router;
