@@ -27,6 +27,18 @@ exports.sendMoney = async (req, res, next) => {
       return res.status(404).json({ message: "Recipient user not found." });
     }
 
+    // Check if sender or receiver is inactive
+    if (req.user.status === "inactive") {
+      return res
+        .status(403)
+        .json({ message: "Your account is inactive. You cannot send money." });
+    }
+    if (recipientUser.status === "inactive") {
+      return res.status(403).json({
+        message: "Recipient account is inactive. You cannot send money to this user.",
+      });
+    }
+
     const fromWallet = await Wallet.findOne({ user: req.user.id }).session(session);
     if (!fromWallet) {
       throw new Error("Sender wallet not found");

@@ -1,74 +1,73 @@
-# Sample cURL commands to test the authentication endpoints
+To test the `PUT /api/admin/user/:userId/freeze` endpoint, follow these steps:
 
-# Endpoint: /api/auth/register
-# Method: POST
-# Description: Register a new user.
-# Required fields: name, email, password, phone
+**Prerequisites:**
+1.  A running instance of the application.
+2.  Access to the database to verify user status.
+3.  An existing "admin" user with a valid authentication token.
+4.  At least one existing "regular" user (not an admin).
 
-curl -X POST http://localhost:3000/api/auth/register \
--H "Content-Type: application/json" \
--d '{
-  "name": "John Doe",
-  "email": "john.doe@example.com",
-  "password": "password123",
-  "phone": "1234567890"
-}'
+**Test Cases:**
 
-echo ""
-echo "--------------------------------------------------------------------"
-echo ""
+**Test Case 1: Successfully freeze a user account**
+1.  **Obtain Admin Token:** Log in as an admin user to get an authentication token.
+2.  **Identify Target User:** Select a regular user's `userId` from the database. Ensure their current `status` is 'active'.
+3.  **Send Request:**
+    *   **Method:** `PUT`
+    *   **URL:** `/api/admin/user/:userId/freeze` (replace `:userId` with the actual ID of the target user)
+    *   **Headers:**
+        *   `Authorization: Bearer <admin_token>`
+    *   **Body:** (Empty or optional, depending on implementation; usually not needed for a freeze endpoint)
+4.  **Verify Response:**
+    *   **Status Code:** Expect `200 OK`
+    *   **Body:** Expect a success message, e.g., `{"message": "User account frozen successfully"}` (exact message may vary).
+5.  **Verify Database:** Check the database to confirm that the target user's `status` has changed from 'active' to 'inactive'.
 
-# Endpoint: /api/auth/login
-# Method: POST
-# Description: Log in an existing user.
-# Required fields: email, password
+**Test Case 2: Attempt to freeze with a non-admin token**
+1.  **Obtain User Token:** Log in as a regular user to get an authentication token.
+2.  **Identify Target User:** Select a regular user's `userId`.
+3.  **Send Request:**
+    *   **Method:** `PUT`
+    *   **URL:** `/api/admin/user/:userId/freeze`
+    *   **Headers:**
+        *   `Authorization: Bearer <regular_user_token>`
+4.  **Verify Response:**
+    *   **Status Code:** Expect `403 Forbidden`
+    *   **Body:** Expect an access denied message, e.g., `{"msg": "Access denied: Not an administrator"}`.
 
-curl -X POST http://localhost:3000/api/auth/login \
--H "Content-Type: application/json" \
--d '{
-  "email": "john.doe@example.com",
-  "password": "password123"
-}'
+**Test Case 3: Attempt to freeze a non-existent user**
+1.  **Obtain Admin Token:** Log in as an admin user to get an authentication token.
+2.  **Use Invalid UserId:** Use a `userId` that does not exist in the database (e.g., a randomly generated valid-looking ID).
+3.  **Send Request:**
+    *   **Method:** `PUT`
+    *   **URL:** `/api/admin/user/:invalidUserId/freeze`
+    *   **Headers:**
+        *   `Authorization: Bearer <admin_token>`
+4.  **Verify Response:**
+    *   **Status Code:** Expect `404 Not Found`
+    *   **Body:** Expect a user not found message, e.g., `{"message": "User not found"}`.
 
-echo ""
-echo "--------------------------------------------------------------------"
-echo ""
+**Test Case 4: Attempt to freeze an already frozen user (optional, depending on desired behavior)**
+1.  **Pre-freeze User:** Manually set a regular user's `status` to 'inactive' in the database, or use Test Case 1 to freeze them.
+2.  **Obtain Admin Token:** Log in as an admin user.
+3.  **Send Request:**
+    *   **Method:** `PUT`
+    *   **URL:** `/api/admin/user/:alreadyFrozenUserId/freeze`
+    *   **Headers:**
+        *   `Authorization: Bearer <admin_token>`
+4.  **Verify Response:**
+    *   **Status Code:** Expect `200 OK` (if idempotent) or potentially `400 Bad Request` with a message like "User already frozen". The implementation of `freezeUserAccount` will determine the exact response.
+    *   **Body:** Appropriate message.
+5.  **Verify Database:** Confirm the user's `status` remains 'inactive'.
 
-# Endpoint: /api/wallet/balance
-# Method: GET
-# Description: Get the balance of the logged-in user's wallet.
-# Authorization: Bearer Token (obtained from /api/auth/login)
-# Postman Instructions:
-# 1. After logging in via /api/auth/login, copy the 'token' from the response.
-# 2. Open a new request tab in Postman.
-# 3. Set the method to GET.
-# 4. Enter the URL: http://localhost:3000/api/wallet/balance
-# 5. Go to the 'Authorization' tab, select type 'Bearer Token'.
-# 6. Paste the copied token into the 'Token' field.
-# 7. Send the request.
-# Expected Response: {"balance": 0} (or the current balance of the user's wallet)
-
-echo ""
-echo "--------------------------------------------------------------------"
-echo ""
-
-# Endpoint: /api/wallet/send-money
-# Method: POST
-# Description: Send money from the logged-in user's wallet to another user's wallet.
-# Authorization: Bearer Token (obtained from /api/auth/login - sender's token)
-# Required fields in body: toUser (recipient's user ID), amount
-
-# Instructions for testing sendMoney:
-# 1. Register two users (e.g., User A and User B) using the /api/auth/register endpoint.
-# 2. Log in User A and copy their token (SENDER_TOKEN).
-# 3. Log in User B and note down their User ID (RECIPIENT_USER_ID). You can get this from the database or by creating a temporary API to list users.
-# 4. (Optional) Add some money to User A's wallet using /api/wallet/add-money (if implemented) or manually adjust their balance in the database, to ensure they have sufficient funds.
-# 5. Use the following cURL command to send money from User A to User B:
-
-curl -X POST http://localhost:3000/api/wallet/send-money \
--H "Content-Type: application/json" \
--H "Authorization: Bearer <SENDER_TOKEN>" \
--d '{
-  "toUser": "<RECIPIENT_USER_ID>",
-  "amount": 10
-}'
+**Test Case 5: Attempt to freeze an admin user (optional, depending on business rules)**
+1.  **Obtain Admin Token:** Log in as an admin user.
+2.  **Identify Target User:** Select an admin user's `userId`.
+3.  **Send Request:**
+    *   **Method:** `PUT`
+    *   **URL:** `/api/admin/user/:adminUserId/freeze`
+    *   **Headers:**
+        *   `Authorization: Bearer <admin_token>`
+4.  **Verify Response:**
+    *   **Status Code:** Expect `400 Bad Request` or `403 Forbidden` if freezing admins is not allowed, or `200 OK` if it is.
+    *   **Body:** Appropriate message.
+5.  **Verify Database:** Check if the admin user's status changed (if allowed).

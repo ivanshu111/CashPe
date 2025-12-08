@@ -20,8 +20,8 @@ exports.getAllUsers = async (req, res) => {
 exports.getAllTransactions = async (req, res) => {
   try {
     const transactions = await Transaction.find()
-      .populate("sender", "name email") // Populate sender with name and email
-      .populate("receiver", "name email"); // Populate receiver with name and email
+      .populate("fromUser", "name email") // Populate sender with name and email
+      .populate("toUser", "name email"); // Populate receiver with name and email
     res.json(transactions);
   } catch (err) {
     console.error(err.message);

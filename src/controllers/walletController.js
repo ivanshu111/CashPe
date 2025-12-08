@@ -37,6 +37,13 @@ exports.addMoney = async (req, res, next) => {
     if (!wallet) {
       return res.status(404).json({ message: "Wallet not found" });
     }
+
+    if (req.user.status === "inactive") {
+      return res
+        .status(403)
+        .json({ message: "Your account is inactive. You cannot add money." });
+    }
+
     wallet.balance += req.body.amount;
     await wallet.save();
     res
