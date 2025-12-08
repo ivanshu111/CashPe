@@ -1,0 +1,51 @@
+Steps to Implement Admin Routes:
+
+1.  **Create `src/controllers/adminController.js`:**
+    *   **`getAllUsers(req, res)`**:
+        *   Fetch all users from the `User` model.
+        *   Return user data (e.g., id, email, wallet status) in the response.
+        *   Implement pagination and filtering if necessary.
+    *   **`getAllTransactions(req, res)`**:
+        *   Fetch all transactions from the `Transaction` model.
+        *   Return transaction details (e.g., sender, receiver, amount, type) in the response.
+        *   Implement pagination and filtering if necessary.
+    *   **`freezeUserAccount(req, res)`**:
+        *   Receive `userId` from request parameters.
+        *   Find the user by `userId` in the `User` model.
+        *   Update the user's status to `frozen` or `inactive`.
+        *   Return success or error message.
+    *   **`unfreezeUserAccount(req, res)`**:
+        *   Receive `userId` from request parameters.
+        *   Find the user by `userId` in the `User` model.
+        *   Update the user's status to `active`.
+        *   Return success or error message.
+
+2.  **Create `src/routes/adminRoutes.js`:**✅✅✅
+    *   Import `express` and create a router.
+    *   Import `adminController` and an `adminAuth` middleware.
+    *   Define routes for:
+        *   `GET /api/admin/users`: `adminAuth`, `getAllUsers`
+        *   `GET /api/admin/transactions`: `adminAuth`, `getAllTransactions`
+        *   `PUT /api/admin/user/:userId/freeze`: `adminAuth`, `freezeUserAccount`
+        *   `PUT /api/admin/user/:userId/unfreeze`: `adminAuth`, `unfreezeUserAccount`
+    *   Export the router.
+
+3.  **Implement `src/middlewares/adminAuth.js`:**✅✅✅
+    *   This middleware should verify that the authenticated user has an `admin` role or equivalent permissions.
+    *   It will typically involve:
+        *   Checking for a valid JWT token in the request header.
+        *   Decoding the token to get `userId`.
+        *   Fetching the user from the database to check their `role`.
+        *   If `role` is `admin`, call `next()`.
+        *   Otherwise, return a 403 Forbidden error.
+
+4.  **Integrate `adminRoutes` into `src/app.js`:**
+    *   Import `adminRoutes`.
+    *   Use `app.use('/api/admin', adminRoutes);` to register the admin routes.
+
+5.  **Update `User` Model (if necessary):**✅✅✅
+    *   Ensure the `User` schema in `src/models/User.js` has a `role` field (e.g., `String, default: 'user'`) and a `status` field (e.g., `String, default: 'active'`).
+
+6.  **Testing:**
+    *   Use tools like Postman or Insomnia to test each admin endpoint, ensuring correct authentication, authorization, and functionality.
+    *   Write unit and integration tests for the new admin controllers and middleware.

@@ -3,6 +3,7 @@ const express = require("express");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const walletRoutes = require("./routes/walletRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const helmet = require("helmet");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
@@ -35,7 +36,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/wallet", walletRoutes);
-
+app.use("/api/admin", adminRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

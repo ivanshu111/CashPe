@@ -7,3 +7,9 @@ Wallet & Transaction Endpoints:
   GET /details
   POST /add-money
   POST /send-money
+
+Admin Endpoints:
+  GET /api/admin/users
+  GET /api/admin/transactions
+  PUT /api/admin/user/:userId/freeze
+  PUT /api/admin/user/:userId/unfreeze
