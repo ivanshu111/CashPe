@@ -107,3 +107,74 @@ To test the `PATCH /api/auth/profile` endpoint, follow these steps:
 5.  **Verify Response:**
     *   **Status Code:** Expect `401 Unauthorized`
     *   **Body:** Expect an unauthorized message.
+
+---
+
+### Register User with Profile Picture (POST /api/auth/register)
+
+This endpoint allows a new user to register, optionally uploading a profile picture.
+
+**Method:** `POST`
+**URL:** `/api/auth/register`
+**Headers:**
+*   `Content-Type: multipart/form-data`
+
+**Body (multipart/form-data):**
+
+This request body should be sent as `multipart/form-data`. Each field below corresponds to a part in the form data.
+
+*   **`name`**: `John Doe` (Text field)
+*   **`email`**: `john.doe@example.com` (Text field)
+*   **`password`**: `password123` (Text field, min 6 characters)
+*   **`phone`**: `1234567890` (Text field, 10 digits)
+*   **`pin`**: `1234` (Text field, 4 digits)
+*   **`profilePicture`**: (File field, select an image file like `image.jpg`, `image.png`, etc.)
+
+**Example using `curl`:**
+
+```bash
+curl -X POST \
+  http://localhost:3000/api/auth/register \
+  -H 'Content-Type: multipart/form-data' \
+  -F 'name=John Doe' \
+  -F 'email=john.doe@example.com' \
+  -F 'password=password123' \
+  -F 'phone=1234567890' \
+  -F 'pin=1234' \
+  -F 'profilePicture=@/path/to/your/image.jpg;type=image/jpeg'
+```
+
+**Expected Response (201 Created):**
+```json
+{
+    "message": "User registered successfully",
+    "userId": "65b7d6b... (newly created user ID)"
+}
+```
+
+**Expected Response (400 Bad Request - Missing fields):**
+```json
+{
+    "message": "All required fields (name, email, password, phone, pin) are necessary"
+}
+```
+
+**Expected Response (400 Bad Request - Email already exists):**
+```json
+{
+    "message": "Email already exists"
+}
+```
+
+**Expected Response (400 Bad Request - Invalid file type for profile picture):**
+```json
+{
+    "errors": [
+        {
+            "msg": "Error: Images Only!",
+            "param": "profilePicture",
+            "location": "file"
+        }
+    ]
+}
+```

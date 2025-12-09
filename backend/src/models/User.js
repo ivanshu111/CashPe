@@ -48,13 +48,17 @@ const userSchema = new mongoose.Schema(
     },
     pin: {
       type: String,
-      required: true,
       validate: {
         validator: function (v) {
           return /^\d{4}$/.test(v);
         },
         message: "Pin must be a 4-digit number",
       },
+    },
+    profilePicture: {
+      type: String,
+      default:
+        "https://www.cielhr.com/wp-content/uploads/2020/10/dummy-image.jpg",
     },
   },
   { timestamps: true }

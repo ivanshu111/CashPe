@@ -1,0 +1,208 @@
+To implement functionality for users to upload a profile picture from their local computer, you'll need to make changes on both the backend and potentially consider frontend aspects.
+
+### Backend Implementation Steps:
+
+**1. Update the User Model (src/models/User.js):**
+Add a field to your `User` schema to store the URL or path to the user's profile picture.
+
+```javascript
+// src/models/User.js
+const mongoose = require("mongoose");
+// ... other imports
+
+const userSchema = new mongoose.Schema(
+  {
+    // ... existing fields
+    profilePicture: {
+      type: String, // Store the URL or path to the image
+      default: "", // Default empty string or a placeholder image URL
+    },
+    // ... other fields
+  },
+  { timestamps: true }
+);
+
+// ... existing pre-save hooks or methods
+
+module.exports = mongoose.model("User", userSchema);
+```
+
+**2. Install a File Upload Middleware (e.g., Multer):**
+Multer is a Node.js middleware for handling `multipart/form-data`, which is primarily used for uploading files.
+
+Install it:
+```bash
+npm install multer
+```
+
+**3. Configure Multer and Create an Upload Route/Controller:**
+You'll need a new route and controller function to handle the actual file upload.
+
+*   **Create a `src/middlewares/upload.js` for Multer configuration:**
+
+    ```javascript
+    // src/middlewares/upload.js
+    const multer = require("multer");
+    const path = require("path");
+
+    // Set storage engine
+    const storage = multer.diskStorage({
+      destination: "./public/uploads/profile-pictures/", // Directory to save files
+      filename: function (req, file, cb) {
+        cb(
+          null,
+          file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+        );
+      },
+    });
+
+    // Initialize upload
+    const upload = multer({
+      storage: storage,
+      limits: { fileSize: 1000000 }, // 1MB limit
+      fileFilter: function (req, file, cb) {
+        checkFileType(file, cb);
+      },
+    });
+
+    // Check file type
+    function checkFileType(file, cb) {
+      // Allowed ext
+      const filetypes = /jpeg|jpg|png|gif/;
+      // Check ext
+      const extname = filetypes.test(
+        path.extname(file.originalname).toLowerCase()
+      );
+      // Check mime
+      const mimetype = filetypes.test(file.mimetype);
+
+      if (mimetype && extname) {
+        return cb(null, true);
+      } else {
+        cb("Error: Images Only!");
+      }
+    }
+
+    module.exports = upload;
+    ```
+    *   **Note:** You'll need to create the directory `public/uploads/profile-pictures/` in your project root. You might also want to serve static files from the `public` directory.
+
+*   **Create a `src/routes/userRoutes.js` (if not already existing) or add to an existing one:**
+
+    ```javascript
+    // src/routes/userRoutes.js
+    const express = require("express");
+    const router = express.Router();
+    const auth = require("../middlewares/auth"); // Assuming you have an auth middleware
+    const upload = require("../middlewares/upload"); // Multer middleware
+    const userController = require("../controllers/userController"); // Your user controller
+
+    // Route to upload profile picture
+    router.post(
+      "/profile-picture",
+      auth, // Ensure user is authenticated
+      upload.single("profilePicture"), // 'profilePicture' is the field name from the form
+      userController.uploadProfilePicture
+    );
+
+    module.exports = router;
+    ```
+
+*   **Add `uploadProfilePicture` function to `src/controllers/userController.js`:**
+
+    ```javascript
+    // src/controllers/userController.js
+    // ... existing imports and functions
+
+    const uploadProfilePicture = async (req, res, next) => {
+      try {
+        if (!req.file) {
+          return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        const userId = req.user.id; // Get user ID from authenticated request
+        const user = await User.findById(userId);
+
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        // Save the path to the database
+        user.profilePicture = `/uploads/profile-pictures/${req.file.filename}`;
+        await user.save();
+
+        res.status(200).json({
+          message: "Profile picture uploaded successfully",
+          profilePicture: user.profilePicture,
+        });
+      } catch (error) {
+        next(error); // Pass errors to the error handling middleware
+      }
+    };
+
+    module.exports = {
+      // ... existing exports
+      uploadProfilePicture,
+    };
+    ```
+
+**4. Serve Static Files (src/app.js):**
+To make the uploaded images accessible via URL, you need to configure Express to serve static files.
+
+```javascript
+// src/app.js
+// ... existing imports
+const path = require("path"); // Add this import
+
+// ... existing middleware like app.use(express.json());
+
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, "..", "public")));
+
+// ... existing routes
+```
+*   **Note:** Create a `public` folder in your project root.
+
+### Frontend Considerations (Briefly):
+
+On the frontend, you would use an HTML form with `enctype="multipart/form-data"` and an input of `type="file"`.
+
+```html
+<form id="uploadForm" enctype="multipart/form-data">
+  <input type="file" name="profilePicture" accept="image/*" />
+  <button type="submit">Upload Profile Picture</button>
+</form>
+```
+
+You would then use JavaScript (e.g., `fetch` or `axios`) to send this form data to your backend endpoint (`/api/users/profile-picture`).
+
+```javascript
+// Example using fetch API
+const uploadForm = document.getElementById("uploadForm");
+uploadForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const formData = new FormData(uploadForm);
+
+  try {
+    const response = await fetch("/api/users/profile-picture", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer YOUR_JWT_TOKEN_HERE", // Include JWT token
+      },
+      body: formData,
+    });
+    const data = await response.json();
+    if (response.ok) {
+      alert(data.message);
+      // Update UI with new profile picture if needed
+    } else {
+      alert("Error: " + data.message);
+    }
+  } catch (error) {
+    console.error("Upload failed:", error);
+    alert("Upload failed due to network error.");
+  }
+});
+```
+
+This guide covers the essential steps for implementing profile picture upload functionality.

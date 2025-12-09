@@ -31,7 +31,7 @@ Here are some suggested features to enhance the application, categorized for cla
 #### Core User Features
 - **Personal Transaction History:** Allow users to view a list of their own incoming and outgoing transactions. This is a crucial feature for users to track their financial activity.✅✅✅
 - **Request Money:** Enable users to send a payment request to another user. The recipient of the request can then approve or deny the payment. This would require a new "requests" system.
-- **User Search:** Implement a feature for users to find other users by their email or phone number, making it easier to initiate transactions without knowing a user's internal ID.
+- **User Search:** Implement a feature for users to find other users by their email or phone number, making it easier to initiate transactions without knowing a user's internal ID.✅✅✅
 
 #### Notifications
 - **In-App Notifications:** Create a simple notification system to inform users of important events, such as:
