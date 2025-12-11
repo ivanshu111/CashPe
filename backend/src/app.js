@@ -4,13 +4,39 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const walletRoutes = require("./routes/walletRoutes");
 const adminRoutes = require("./routes/adminRoutes");
-const userRoutes = require("./routes/userRoutes"); // New import
+const userRoutes = require("./routes/userRoutes");
+
+const http = require("http");
+const {
+  initSocketManager,
+  emitNotificationToUser,
+} = require("./service/socketManager");
+const { subscriber, NOTIFICATION_CHANNEL } = require("./service/redisManager");
+const notificationRoutes = require("./routes/notificationRoutes");
+
 const path = require("path");
 const helmet = require("helmet");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const fs = require("fs");
 const app = express();
+
+const server = http.createServer(app);
+initSocketManager(server);
+subscriber.subscribe(NOTIFICATION_CHANNEL, (err, count) => {
+  if (err) {
+    console.error("Failed to subscribe to redis channel: ", err);
+    return;
+  }
+  console.log(`Subscribed successfully to ${count} Redis channel(s).`);
+});
+
+subscriber.on("message", (channel, message) => {
+  if (channel === NOTIFICATION_CHANNEL) {
+    const notification = JSON.parse(message);
+    emitNotificationToUser(notification.userId, notification);
+  }
+});
 
 let PORT = 3000;
 try {
@@ -41,7 +67,8 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/auth", authRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/users", userRoutes); // New app.use
+app.use("/api/users", userRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -52,7 +79,7 @@ app.use((err, req, res, next) => {
 connectDB()
   .then(() => {
     console.log("Database connected successfully");
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
   })
