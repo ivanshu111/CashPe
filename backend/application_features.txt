@@ -7,6 +7,9 @@ Here is a summary of the core features implemented in your backend application.
 -   **Secure Login:** Registered users can log in using their email and password. A successful login returns a JWT (JSON Web Token) for authenticating subsequent requests.
 -   **Profile Updates:** Logged-in users can update their profile information, including their name, password, phone number, PIN, and profile picture.
 -   **Password & PIN Security:** User passwords and PINs are securely hashed before being stored in the database to protect user data.
+-   **Account Deletion:** Users can request to delete their own account.
+    -   Deletion is only permitted if the user's wallet balance is exactly 0.
+    -   Upon successful deletion, both the user's account and their associated wallet are removed from the database.
 
 ### 2. Wallet & Transactions
 -   **Automatic Wallet Creation:** A digital wallet with a starting balance of 0 is automatically created for every new user upon registration.

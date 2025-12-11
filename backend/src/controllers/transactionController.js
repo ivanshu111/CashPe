@@ -54,10 +54,12 @@ exports.sendMoney = async (req, res, next) => {
       throw new Error("Sender wallet not found");
     }
     if (fromWallet.balance < amount) {
-      throw new Error("Insufficient balance");
+      res.json({ message: "Insufficient balance" });
+      // throw new Error("Insufficient balance");
     }
     const toWallet = await Wallet.findOne({ user: toUserId }).session(session);
     if (!toWallet) {
+      res.json({ message: "Recipient wallet not found" });
       throw new Error("Recipient wallet not found");
     }
 
@@ -119,11 +121,9 @@ exports.sendMoney = async (req, res, next) => {
       });
       await receiverNotification.save();
       publishNotification(receiverNotification.toObject());
-
     } catch (error) {
       console.error("Error creating and publishing notifications:", error);
     }
-    
   } catch (error) {
     if (debitTransaction) {
       debitTransaction.status = "failed";
