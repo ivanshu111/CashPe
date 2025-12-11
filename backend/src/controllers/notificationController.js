@@ -33,10 +33,24 @@ const createNotification = async (req, res) => {
 const getUserNotifications = async (req, res) => {
   try {
     const { userId } = req.params;
-    const notifications = await Notification.find({ userId }).sort({
-      createdAt: -1,
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+
+    const totalNotifications = await Notification.countDocuments({ userId });
+    const totalPages = Math.ceil(totalNotifications / limit);
+
+    const notifications = await Notification.find({ userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({
+      notifications,
+      currentPage: page,
+      totalPages,
+      totalNotifications,
     });
-    res.status(200).json(notifications);
   } catch (error) {
     res.status(500).json({ error: "Internal server error." });
   }
@@ -45,12 +59,25 @@ const getUserNotifications = async (req, res) => {
 // Gets notification history for the currently logged-in user
 const getLoggedInUserNotifications = async (req, res) => {
   try {
-    // userId is available from req.user._id thanks to the auth middleware
     const userId = req.user._id;
-    const notifications = await Notification.find({ userId }).sort({
-      createdAt: -1,
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+
+    const totalNotifications = await Notification.countDocuments({ userId });
+    const totalPages = Math.ceil(totalNotifications / limit);
+
+    const notifications = await Notification.find({ userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({
+      notifications,
+      currentPage: page,
+      totalPages,
+      totalNotifications,
     });
-    res.status(200).json(notifications);
   } catch (error) {
     console.error("Error fetching logged-in user's notifications:", error);
     res.status(500).json({ error: "Internal server error." });

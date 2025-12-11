@@ -14,7 +14,7 @@
 
   The Weaknesses (What Would Cause Problems)
 
-   1. Database Performance (The Biggest Bottleneck):
+   1. Database Performance (The Biggest Bottleneck): ✅✅✅
        * As more users and transactions are added, your MongoDB queries will become slow if the database is not properly indexed. A query that is instant with 100 users could take seconds
          with 100,000, bringing your app to a crawl.
        * Solution: You need to add indexes to your database schemas on fields that are frequently searched.

@@ -19,10 +19,12 @@ const transactionSchema = new mongoose.Schema(
     fromUser: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      index: true,
     },
     toUser: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      index: true,
     },
     status: {
       type: String,

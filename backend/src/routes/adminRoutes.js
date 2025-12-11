@@ -8,13 +8,24 @@ const adminAuth = require("../middlewares/adminAuth");
  * /api/admin/users:
  *   get:
  *     summary: Get all users
- *     description: Get a list of all users.
+ *     description: Get a paginated list of all users.
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: The page number to retrieve.
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: The number of users to retrieve per page.
  *     responses:
  *       200:
- *         description: A list of users
+ *         description: A paginated list of users
  *       401:
  *         description: Unauthorized
  */
@@ -25,13 +36,24 @@ router.get("/users", adminAuth, getAllUsers);
  * /api/admin/transactions:
  *   get:
  *     summary: Get all transactions
- *     description: Get a list of all transactions.
+ *     description: Get a paginated list of all transactions.
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: The page number to retrieve.
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: The number of transactions to retrieve per page.
  *     responses:
  *       200:
- *         description: A list of transactions
+ *         description: A paginated list of transactions
  *       401:
  *         description: Unauthorized
  */
@@ -80,7 +102,7 @@ router.put(
  * /api/admin/users/{userId}/details:
  *   get:
  *     summary: Get detailed user view
- *     description: Get a detailed view of a single user.
+ *     description: Get a detailed view of a single user, including a paginated list of their transactions.
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
@@ -90,6 +112,16 @@ router.put(
  *         required: true
  *         schema:
  *           type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: The page number for the transaction list.
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: The number of transactions to retrieve per page.
  *     responses:
  *       200:
  *         description: Detailed user view retrieved successfully

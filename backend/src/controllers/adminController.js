@@ -9,8 +9,24 @@ const { publishNotification } = require("../service/redisManager"); // Import no
 // @access  Admin
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password"); // Exclude password from the results
-    res.json(users);
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+
+    const totalUsers = await User.countDocuments();
+    const totalPages = Math.ceil(totalUsers / limit);
+
+    const users = await User.find()
+      .select("-password")
+      .skip(skip)
+      .limit(limit);
+
+    res.json({
+      users,
+      currentPage: page,
+      totalPages,
+      totalUsers,
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -22,10 +38,26 @@ exports.getAllUsers = async (req, res) => {
 // @access  Admin
 exports.getAllTransactions = async (req, res) => {
   try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+
+    const totalTransactions = await Transaction.countDocuments();
+    const totalPages = Math.ceil(totalTransactions / limit);
+
     const transactions = await Transaction.find()
-      .populate("fromUser", "name email") // Populate sender with name and email
-      .populate("toUser", "name email"); // Populate receiver with name and email
-    res.json(transactions);
+      .populate("fromUser", "name email")
+      .populate("toUser", "name email")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.json({
+      transactions,
+      currentPage: page,
+      totalPages,
+      totalTransactions,
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -94,9 +126,12 @@ exports.updateUserStatus = async (req, res) => {
 exports.getDetailedUserView = async (req, res) => {
   try {
     const { userId } = req.params;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
 
     // 1. Get User Profile
-    const user = await User.findById(userId).select("-password -pin"); // Exclude sensitive info
+    const user = await User.findById(userId).select("-password -pin");
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
@@ -104,18 +139,27 @@ exports.getDetailedUserView = async (req, res) => {
     // 2. Get User Wallet
     const wallet = await Wallet.findOne({ user: userId });
 
-    // 3. Get User Transactions
-    const transactions = await Transaction.find({
-      $or: [{ fromUser: userId }, { toUser: userId }],
-    })
+    // 3. Get User Transactions (with pagination)
+    const transactionQuery = { $or: [{ fromUser: userId }, { toUser: userId }] };
+    const totalTransactions = await Transaction.countDocuments(transactionQuery);
+    const totalPages = Math.ceil(totalTransactions / limit);
+
+    const transactions = await Transaction.find(transactionQuery)
       .sort({ createdAt: -1 })
       .populate("fromUser", "name email")
-      .populate("toUser", "name email");
+      .populate("toUser", "name email")
+      .skip(skip)
+      .limit(limit);
 
     res.status(200).json({
       user,
       wallet,
-      transactions,
+      transactions: {
+        data: transactions,
+        currentPage: page,
+        totalPages,
+        totalTransactions,
+      },
     });
 
   } catch (err) {

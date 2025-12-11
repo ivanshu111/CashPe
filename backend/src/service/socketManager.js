@@ -1,4 +1,6 @@
 const { Server } = require("socket.io");
+const { createAdapter } = require("@socket.io/redis-adapter");
+const Redis = require("ioredis"); // Use ioredis
 
 let io;
 
@@ -8,6 +10,12 @@ const initSocketManager = (server) => {
       origin: "*",
     },
   });
+
+  // Configure Redis adapter
+  const pubClient = new Redis(); // Connects to redis://127.0.0.1:6379 by default
+  const subClient = pubClient.duplicate();
+
+  io.adapter(createAdapter(pubClient, subClient));
 
   io.on("connection", (socket) => {
     console.log("a user connected:", socket.id);
