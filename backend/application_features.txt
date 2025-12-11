@@ -1,0 +1,34 @@
+# CashPe Backend: Application Features & Functionalities
+
+Here is a summary of the core features implemented in your backend application.
+
+### 1. User Account Management
+-   **User Registration:** New users can register with a name, email, password, phone number, a 4-digit PIN, and an optional profile picture.
+-   **Secure Login:** Registered users can log in using their email and password. A successful login returns a JWT (JSON Web Token) for authenticating subsequent requests.
+-   **Profile Updates:** Logged-in users can update their profile information, including their name, password, phone number, PIN, and profile picture.
+-   **Password & PIN Security:** User passwords and PINs are securely hashed before being stored in the database to protect user data.
+
+### 2. Wallet & Transactions
+-   **Automatic Wallet Creation:** A digital wallet with a starting balance of 0 is automatically created for every new user upon registration.
+-   **Add Money:** Users can add money to their own wallet.
+-   **Send Money:** Users can send money from their wallet to another user's wallet.
+-   **View Balance:** Users can check their current wallet balance.
+-   **Transaction History:** Logged-in users can retrieve a detailed history of all their transactions (both sent and received), including sender/receiver details.
+-   **Account Status Checks:** Users with a "frozen" (inactive) account are prevented from sending or adding money.
+
+### 3. Real-Time Notification System
+-   **Persistent Notifications:** All generated notifications are saved in the MongoDB database, so users can view their history even if they were offline.
+-   **Real-Time Delivery:** Uses Socket.IO and Redis to deliver instant notifications to online users.
+-   **Specific Notification Triggers:** Users receive notifications for the following events:
+    -   When they successfully send money to someone (confirmation).
+    -   When they receive money from someone (alert).
+    -   When they add money to their own wallet.
+    -   When an administrator freezes their account.
+    -   When an administrator unfreezes their account.
+-   **Fetch Notification History:** Users can retrieve a list of all their past notifications.
+
+### 4. Administrator Panel & Controls
+-   **Role-Based Access:** The system differentiates between regular users and administrators, with specific routes protected for admin-only access.
+-   **View All Users:** Admins can retrieve a complete list of all users registered in the system.
+-   **View All Transactions:** Admins can retrieve a complete list of every transaction that has occurred between users.
+-   **Freeze/Unfreeze Accounts:** Admins have the ability to change any user's status to "inactive" (frozen) or "active" (unfrozen), which restricts the user's ability to perform transactions.
