@@ -1,180 +1,95 @@
-To test the `PATCH /api/auth/profile` endpoint, follow these steps:
+# CashPe Backend: API Endpoints
 
-**Prerequisites:**
-1.  A running instance of the application.
-2.  Access to the database to verify user profile changes.
-3.  An existing "regular" user with a valid authentication token.
-
-**Test Cases:**
-
-**Test Case 1: Successfully update user's name**
-1.  **Obtain User Token:** Log in as a regular user to get an authentication token.
-2.  **Send Request:**
-    *   **Method:** `PATCH`
-    *   **URL:** `/api/auth/profile`
-    *   **Headers:**
-        *   `Authorization: Bearer <user_token>`
-        *   `Content-Type: application/json`
-    *   **Body:**
-        ```json
-        {
-            "name": "Jane Doe Updated"
-        }
-        ```
-3.  **Verify Response:**
-    *   **Status Code:** Expect `200 OK`
-    *   **Body:** Expect a success message, e.g., `{"message": "Profile updated successfully"}`.
-4.  **Verify Database:** Check the database to confirm that the user's `name` has been updated to "Jane Doe Updated".
-
-**Test Case 2: Successfully update user's phone number**
-1.  **Obtain User Token:** Log in as a regular user to get an authentication token.
-2.  **Send Request:**
-    *   **Method:** `PATCH`
-    *   **URL:** `/api/auth/profile`
-    *   **Headers:**
-        *   `Authorization: Bearer <user_token>`
-        *   `Content-Type: application/json`
-    *   **Body:**
-        ```json
-        {
-            "phone": "9876543210"
-        }
-        ```
-3.  **Verify Response:**
-    *   **Status Code:** Expect `200 OK`
-    *   **Body:** Expect a success message.
-4.  **Verify Database:** Check the database to confirm that the user's `phone` has been updated to "9876543210".
-
-**Test Case 3: Successfully update user's password**
-1.  **Obtain User Token:** Log in as a regular user to get an authentication token.
-2.  **Send Request:**
-    *   **Method:** `PATCH`
-    *   **URL:** `/api/auth/profile`
-    *   **Headers:**
-        *   `Authorization: Bearer <user_token>`
-        *   `Content-Type: application/json`
-    *   **Body:**
-        ```json
-        {
-            "password": "newStrongPassword123"
-        }
-        ```
-3.  **Verify Response:**
-    *   **Status Code:** Expect `200 OK`
-    *   **Body:** Expect a success message.
-4.  **Verify Database:** Check the database to confirm that the user's `password` has been updated (it will be hashed, so you'll need to attempt to log in with the new password to confirm it works, or verify the hash is different).
-
-**Test Case 4: Successfully update multiple fields (name and phone)**
-1.  **Obtain User Token:** Log in as a regular user to get an authentication token.
-2.  **Send Request:**
-    *   **Method:** `PATCH`
-    *   **URL:** `/api/auth/profile`
-    *   **Headers:**
-        *   `Authorization: Bearer <user_token>`
-        *   `Content-Type: application/json`
-    *   **Body:**
-        ```json
-        {
-            "name": "Alice Wonderland",
-            "phone": "1122334455"
-        }
-        ```
-3.  **Verify Response:**
-    *   **Status Code:** Expect `200 OK`
-    *   **Body:** Expect a success message.
-4.  **Verify Database:** Check the database to confirm that both the `name` and `phone` have been updated.
-
-**Test Case 5: Attempt to update without a token (Unauthorized)**
-1.  **Send Request:**
-    *   **Method:** `PATCH`
-    *   **URL:** `/api/auth/profile`
-    *   **Headers:**
-        *   `Content-Type: application/json`
-    *   **Body:** (Any valid update data, e.g., `{"name": "Unauthorized User"}`)
-5.  **Verify Response:**
-    *   **Status Code:** Expect `401 Unauthorized`
-    *   **Body:** Expect an unauthorized message, e.g., `{"message": "Unauthorized"}`.
-
-**Test Case 6: Attempt to update with an invalid token (Unauthorized)**
-1.  **Use Invalid Token:** Provide a malformed or expired JWT token.
-2.  **Send Request:**
-    *   **Method:** `PATCH`
-    *   **URL:** `/api/auth/profile`
-    *   **Headers:**
-        *   `Authorization: Bearer <invalid_token>`
-        *   `Content-Type: application/json`
-    *   **Body:** (Any valid update data)
-5.  **Verify Response:**
-    *   **Status Code:** Expect `401 Unauthorized`
-    *   **Body:** Expect an unauthorized message.
+This document lists all the available API endpoints for the application, categorized by their main function. It assumes that these routes are prefixed with `/api` in your main `app.js` file (e.g., `/api/auth/login`).
 
 ---
 
-### Register User with Profile Picture (POST /api/auth/register)
+### Authentication (`/api/auth`)
 
-This endpoint allows a new user to register, optionally uploading a profile picture.
+-   **`POST /register`**
+    -   **Description:** Registers a new user. Expects `multipart/form-data` including name, email, password, phone, pin, and an optional `profilePicture` file.
+    -   **Protection:** Public
 
-**Method:** `POST`
-**URL:** `/api/auth/register`
-**Headers:**
-*   `Content-Type: multipart/form-data`
+-   **`POST /login`**
+    -   **Description:** Logs in an existing user with email and password. Returns a JWT token upon success.
+    -   **Protection:** Public
 
-**Body (multipart/form-data):**
+-   **`PATCH /profile`**
+    -   **Description:** Updates the profile of the currently logged-in user. Can update name, password, phone, pin, and profile picture.
+    -   **Protection:** Authenticated User
 
-This request body should be sent as `multipart/form-data`. Each field below corresponds to a part in the form data.
+-   **`GET /history`**
+    -   **Description:** Gets the complete transaction history (sent and received) for the currently logged-in user.
+    -   **Protection:** Authenticated User
 
-*   **`name`**: `John Doe` (Text field)
-*   **`email`**: `john.doe@example.com` (Text field)
-*   **`password`**: `password123` (Text field, min 6 characters)
-*   **`phone`**: `1234567890` (Text field, 10 digits)
-*   **`pin`**: `1234` (Text field, 4 digits)
-*   **`profilePicture`**: (File field, select an image file like `image.jpg`, `image.png`, etc.)
+---
 
-**Example using `curl`:**
+### User (`/api/users`)
 
-```bash
-curl -X POST \
-  http://localhost:3000/api/auth/register \
-  -H 'Content-Type: multipart/form-data' \
-  -F 'name=John Doe' \
-  -F 'email=john.doe@example.com' \
-  -F 'password=password123' \
-  -F 'phone=1234567890' \
-  -F 'pin=1234' \
-  -F 'profilePicture=@/path/to/your/image.jpg;type=image/jpeg'
-```
+-   **`GET /find`**
+    -   **Description:** Finds a user by their email or phone number. Used to search for recipients before sending money.
+    -   **Protection:** Authenticated User
 
-**Expected Response (201 Created):**
-```json
-{
-    "message": "User registered successfully",
-    "userId": "65b7d6b... (newly created user ID)"
-}
-```
+-   **`POST /profile-picture`**
+    -   **Description:** A dedicated route for the logged-in user to upload or change their profile picture.
+    -   **Protection:** Authenticated User
 
-**Expected Response (400 Bad Request - Missing fields):**
-```json
-{
-    "message": "All required fields (name, email, password, phone, pin) are necessary"
-}
-```
+-   **`DELETE /`**
+    -   **Description:** Deletes the account of the currently logged-in user. Fails if the user's wallet balance is not zero.
+    -   **Protection:** Authenticated User
 
-**Expected Response (400 Bad Request - Email already exists):**
-```json
-{
-    "message": "Email already exists"
-}
-```
+---
 
-**Expected Response (400 Bad Request - Invalid file type for profile picture):**
-```json
-{
-    "errors": [
-        {
-            "msg": "Error: Images Only!",
-            "param": "profilePicture",
-            "location": "file"
-        }
-    ]
-}
-```
+### Wallet & Transactions (`/api/wallet`)
+
+-   **`GET /balance`**
+    -   **Description:** Gets the current wallet balance for the logged-in user.
+    -   **Protection:** Authenticated User, PIN Verified
+
+-   **`GET /details`**
+    -   **Description:** Gets the logged-in user's name, wallet balance, and wallet creation date.
+    -   **Protection:** Authenticated User, PIN Verified
+
+-   **`POST /add-money`**
+    -   **Description:** Adds money to the logged-in user's wallet. Max limit of 50,000 per transaction.
+    -   **Protection:** Authenticated User
+
+-   **`POST /send-money`**
+    -   **Description:** Sends money from the logged-in user to a specified recipient (`toUser`). Max limit of 1,00,000 per transaction.
+    -   **Protection:** Authenticated User, PIN Verified
+
+---
+
+### Notifications (`/api/notifications`)
+
+-   **`GET /`**
+    -   **Description:** Gets a list of all historical notifications for the currently logged-in user.
+    -   **Protection:** Authenticated User
+
+-   **`GET /:userId`**
+    -   **Description:** Gets a list of all historical notifications for a specific user ID. Primarily for admin use.
+    -   **Protection:** Authenticated User
+
+-   **`POST /`**
+    -   **Description:** Manually creates a notification. Primarily for internal testing.
+    -   **Protection:** Authenticated User
+
+---
+
+### Admin (`/api/admin`)
+
+-   **`GET /users`**
+    -   **Description:** Gets a complete list of all users in the system.
+    -   **Protection:** Admin Only
+
+-   **`GET /transactions`**
+    -   **Description:** Gets a complete list of all transactions that have occurred in the system.
+    -   **Protection:** Admin Only
+
+-   **`PUT /users/:userId/status`**
+    -   **Description:** Updates a specific user's status to `active` or `inactive` (frozen). Triggers a notification to the user.
+    -   **Protection:** Admin Only
+
+-   **`GET /users/:userId/details`**
+    -   **Description:** Gets a consolidated, detailed view of a single user, including their profile, wallet balance, and full transaction history.
+    -   **Protection:** Admin Only

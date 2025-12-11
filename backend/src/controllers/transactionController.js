@@ -5,6 +5,9 @@ const User = require("../models/User");
 const Notification = require("../models/Notification");
 const { publishNotification } = require("../service/redisManager");
 
+// Define the maximum amount allowed to send in a single transaction (1 Lakh Rs)
+const MAX_SEND_AMOUNT = 100000;
+
 exports.sendMoney = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -26,6 +29,13 @@ exports.sendMoney = async (req, res, next) => {
       return res
         .status(400)
         .json({ message: "Cannot send money to yourself." });
+    }
+
+    // --- Enforce the send money limit ---
+    if (amount > MAX_SEND_AMOUNT) {
+      return res.status(400).json({
+        message: `You cannot send more than Rs. ${MAX_SEND_AMOUNT} in a single transaction.`,
+      });
     }
 
     // Check if recipient user exists
@@ -53,13 +63,14 @@ exports.sendMoney = async (req, res, next) => {
     if (!fromWallet) {
       throw new Error("Sender wallet not found");
     }
+    // Fix: Ensure insufficient balance correctly throws an error and aborts transaction
     if (fromWallet.balance < amount) {
-      res.json({ message: "Insufficient balance" });
-      // throw new Error("Insufficient balance");
+      await session.abortTransaction(); // Abort the transaction
+      session.endSession();
+      return res.status(400).json({ message: "Insufficient balance" }); // Return the error
     }
     const toWallet = await Wallet.findOne({ user: toUserId }).session(session);
     if (!toWallet) {
-      res.json({ message: "Recipient wallet not found" });
       throw new Error("Recipient wallet not found");
     }
 
@@ -121,8 +132,8 @@ exports.sendMoney = async (req, res, next) => {
       });
       await receiverNotification.save();
       publishNotification(receiverNotification.toObject());
-    } catch (error) {
-      console.error("Error creating and publishing notifications:", error);
+    } catch (notificationError) {
+      console.error("Error creating and publishing notifications:", notificationError);
     }
   } catch (error) {
     if (debitTransaction) {

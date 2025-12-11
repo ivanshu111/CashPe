@@ -35,3 +35,32 @@ Here is a summary of the core features implemented in your backend application.
 -   **View All Users:** Admins can retrieve a complete list of all users registered in the system.
 -   **View All Transactions:** Admins can retrieve a complete list of every transaction that has occurred between users.
 -   **Freeze/Unfreeze Accounts:** Admins have the ability to change any user's status to "inactive" (frozen) or "active" (unfrozen), which restricts the user's ability to perform transactions.
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+-   **Potential Future Admin Features:**
+    -   **Analytics Dashboard:** A dashboard showing key metrics like user growth, transaction volume, and total funds in circulation.
+    -   **Detailed User View:** Ability to select a single user and see their full profile, wallet balance, and complete transaction history. ✅✅✅
+    -   **Manual Wallet Adjustment:** A secure feature for admins to credit or debit a user's wallet to correct errors or resolve disputes, with every action logged for auditing.
+    -   **Advanced Transaction Management:** The ability to search and filter all transactions by user, date range, amount, or status.
+    -   **Broadcast Notifications:** A tool to send a system-wide notification to all users, for announcements like scheduled maintenance.
+    -   **Data Export:** The ability to export user lists or transaction reports as CSV or PDF files for analysis and record-keeping.
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+### 5. Potential Future Features
+-   **Request Money:** Allow users to send a payment request to another user, who can then approve or deny the request.
+-   **QR Code Payments:** Generate a unique QR code for each user that others can scan to initiate a payment, simplifying in-person transactions.
+-   **Two-Factor Authentication (2FA):** Add an extra layer of security for logins and high-value transactions using an authenticator app or SMS.
+-   **Password/PIN Reset Flow:** Implement a "Forgot Password/PIN" feature that sends a secure reset link or code to the user's registered email.
+-   **Transaction Memos:** Allow users to add a short note or description to each transaction (e.g., "For lunch," "Movie tickets").
+-   **Bill Splitting:** Create a feature to easily split a bill among multiple friends, with one user paying and requesting the shares from others.
+-   **Bank Account Integration:** Use a service like Plaid to allow users to securely link their bank accounts to add and withdraw funds.
+-   **Downloadable Statements:** Allow users to generate and download a PDF statement of their transactions for a selected time period.
+-   **Admin Dashboard:** A proper web interface for administrators to manage users, view analytics, and resolve issues, rather than just using API endpoints.
+
+
+right now i having only following features for admin:
+1. to get all users.
+2. to get all transactions data.
+3. to freeze/unfreeze user account.

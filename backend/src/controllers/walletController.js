@@ -2,6 +2,9 @@ const Wallet = require("../models/Wallet");
 const Notification = require("../models/Notification"); // Import Notification model
 const { publishNotification } = require("../service/redisManager"); // Import notification service
 
+// Define the maximum amount allowed to add in a single transaction
+const MAX_ADD_AMOUNT = 50000; 
+
 exports.getBalance = async (req, res, next) => {
   try {
     const wallet = await Wallet.findOne({ user: req.user.id });
@@ -48,9 +51,14 @@ exports.addMoney = async (req, res, next) => {
 
     const amountToAdd = req.body.amount;
     if (!amountToAdd || amountToAdd <= 0) {
-      return res
-        .status(400)
-        .json({ message: "Amount to add must be a positive number." });
+        return res.status(400).json({ message: "Amount to add must be a positive number." });
+    }
+
+    // --- Enforce the add money limit ---
+    if (amountToAdd > MAX_ADD_AMOUNT) {
+      return res.status(400).json({
+        message: `You cannot add more than Rs. ${MAX_ADD_AMOUNT} in a single transaction.`,
+      });
     }
 
     wallet.balance += amountToAdd;
@@ -61,20 +69,19 @@ exports.addMoney = async (req, res, next) => {
 
     // --- Create and Publish Notification ---
     try {
-      const notificationMessage = `You added Rs. ${amountToAdd}. to your wallet. New balance: Rs. ${wallet.balance}.`;
-
+      const notificationMessage = `Your wallet has been credited with Rs. ${amountToAdd}. New balance: Rs. ${wallet.balance}.`; // Updated phrasing
+      
       const notification = new Notification({
         userId: req.user.id,
         message: notificationMessage,
       });
       await notification.save();
       publishNotification(notification.toObject());
+
     } catch (notificationError) {
-      console.error(
-        "Error creating notification for add money:",
-        notificationError
-      );
+      console.error("Error creating notification for add money:", notificationError);
     }
+
   } catch (error) {
     next(error);
   }

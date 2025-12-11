@@ -13,6 +13,8 @@ const {
 } = require("./service/socketManager");
 const { subscriber, NOTIFICATION_CHANNEL } = require("./service/redisManager");
 const notificationRoutes = require("./routes/notificationRoutes");
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 
 const path = require("path");
 const helmet = require("helmet");
@@ -64,6 +66,7 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/auth", authRoutes);
 app.use("/api/wallet", walletRoutes);
 app.use("/api/admin", adminRoutes);
