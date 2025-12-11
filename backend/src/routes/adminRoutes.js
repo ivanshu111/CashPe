@@ -1,20 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const adminController = require("../controllers/adminController");
+const { getAllUsers, getAllTransactions, updateUserStatus } = require("../controllers/adminController");
 const adminAuth = require("../middlewares/adminAuth");
 
 // Admin Routes
-router.get("/users", adminAuth, adminController.getAllUsers);
-router.get("/transactions", adminAuth, adminController.getAllTransactions);
+router.get("/users", adminAuth, getAllUsers);
+router.get("/transactions", adminAuth, getAllTransactions);
+
+// Route to update a user's status (e.g., freeze/unfreeze)
 router.put(
-  "/user/:userId/freeze",
+  "/users/:userId/status",
   adminAuth,
-  adminController.freezeUserAccount
-);
-router.put(
-  "/user/:userId/unfreeze",
-  adminAuth,
-  adminController.unfreezeUserAccount
+  updateUserStatus
 );
 
 module.exports = router;

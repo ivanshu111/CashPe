@@ -1,4 +1,6 @@
 const Wallet = require("../models/Wallet");
+const Notification = require("../models/Notification"); // Import Notification model
+const { publishNotification } = require("../service/redisManager"); // Import notification service
 
 exports.getBalance = async (req, res, next) => {
   try {
@@ -44,11 +46,35 @@ exports.addMoney = async (req, res, next) => {
         .json({ message: "Your account is inactive. You cannot add money." });
     }
 
-    wallet.balance += req.body.amount;
+    const amountToAdd = req.body.amount;
+    if (!amountToAdd || amountToAdd <= 0) {
+      return res
+        .status(400)
+        .json({ message: "Amount to add must be a positive number." });
+    }
+
+    wallet.balance += amountToAdd;
     await wallet.save();
     res
       .status(200)
       .json({ balance: wallet.balance, message: "Money added successfully" });
+
+    // --- Create and Publish Notification ---
+    try {
+      const notificationMessage = `You added Rs. ${amountToAdd}. to your wallet. New balance: Rs. ${wallet.balance}.`;
+
+      const notification = new Notification({
+        userId: req.user.id,
+        message: notificationMessage,
+      });
+      await notification.save();
+      publishNotification(notification.toObject());
+    } catch (notificationError) {
+      console.error(
+        "Error creating notification for add money:",
+        notificationError
+      );
+    }
   } catch (error) {
     next(error);
   }

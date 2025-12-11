@@ -100,20 +100,30 @@ exports.sendMoney = async (req, res, next) => {
     session.endSession();
     res.status(200).json({ message: "Money sent successfully" });
 
-    // Create notifications
+    // --- Create and Publish Notifications ---
     try {
-      const notificationMessage = `You have sent $${amount} to ${recipientUser.name} successfully.`;
-
-      const newNotification = new Notification({
-        userId: req.user.id,
-        message: notificationMessage,
+      // 1. Notification for the Sender
+      const senderMessage = `You have sent Rs. ${amount} to ${recipientUser.name} successfully.`;
+      const senderNotification = new Notification({
+        userId: req.user.id, // The sender
+        message: senderMessage,
       });
-      await newNotification.save();
+      await senderNotification.save();
+      publishNotification(senderNotification.toObject());
 
-      publishNotification(newNotification.toObject());
+      // 2. Notification for the Receiver
+      const receiverMessage = `You have received Rs. ${amount} from ${req.user.name}.`;
+      const receiverNotification = new Notification({
+        userId: toUserId, // The receiver
+        message: receiverMessage,
+      });
+      await receiverNotification.save();
+      publishNotification(receiverNotification.toObject());
+
     } catch (error) {
-      console.error("Error creating notification:", error);
+      console.error("Error creating and publishing notifications:", error);
     }
+    
   } catch (error) {
     if (debitTransaction) {
       debitTransaction.status = "failed";

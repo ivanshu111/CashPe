@@ -48,14 +48,12 @@ const registerUser = async (req, res, next) => {
       return res.status(400).json({ message: "Email already exists" });
     }
     
-    const hashedPassword = await hashPassword(password);
-    
     let profilePicturePath = req.file ? `/public/uploads/profile-pictures/${req.file.filename}` : undefined;
 
     const newUser = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password, // Pass plain text password
       phone,
       pin,
       profilePicture: profilePicturePath,
@@ -131,8 +129,7 @@ const updateUserProfile = async (req, res, next) => {
       user.phone = phone;
     }
     if (password) {
-      const hashedPassword = await hashPassword(password);
-      user.password = hashedPassword;
+      user.password = password; // Pass plain text password
     }
     if (pin) {
       user.pin = pin;
