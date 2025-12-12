@@ -59,7 +59,10 @@ const UserWalletSummary = () => {
           <p className="text-lg">Current Balance</p>
         </div>
         <div className="card-actions flex-col">
-          <Link to="/add-money" className="btn btn-secondary mt-2">
+          <Link
+            to="/add-money"
+            className="mt-2 px-4 py-2 flex items-center justify-center rounded-lg shadow-md hover:shadow-lg transition-all duration-300 font-medium bg-gradient-to-r from-green-500 to-green-700 text-white hover:from-green-600 hover:to-green-800"
+          >
             <CurrencyRupeeIcon className="h-5 w-5 mr-2" /> Add Money
           </Link>
         </div>
