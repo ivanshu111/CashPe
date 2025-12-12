@@ -85,7 +85,7 @@ const AddMoneyPage = () => {
           </div>
 
           {error && (
-            <div className="alert alert-error rounded-xl mb-4 shadow-sm">
+            <div className="alert alert-error rounded-xl mb-4 shadow-sm bg-red-500 text-white">
               {error}
             </div>
           )}
