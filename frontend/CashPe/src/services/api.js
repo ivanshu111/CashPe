@@ -36,6 +36,7 @@ export const login = async (email, password) => {
 export const getWalletDetails = async () => {
   try {
     const response = await api.get("/wallet/details");
+
     return response.data;
   } catch (error) {
     throw error.response.data;
@@ -54,6 +55,15 @@ export const getWalletBalanceWithPin = async (pin) => {
 export const getTransactionHistory = async () => {
   try {
     const response = await api.get("/auth/history");
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const addMoney = async (amount) => {
+  try {
+    const response = await api.post("/wallet/add-money", { amount });
     return response.data;
   } catch (error) {
     throw error.response.data;
