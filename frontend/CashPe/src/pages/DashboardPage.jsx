@@ -7,18 +7,23 @@ import {
 import { Link } from "react-router-dom";
 import UserWalletSummary from "../components/UserWalletSummary";
 import { getTransactionHistory } from "../services/api"; // Import the new API function
+import { useSelector } from "react-redux"; // Import useSelector
 
 const DashboardPage = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useSelector((state) => state.auth); // Get current user from Redux store
+  const userId = user?._id;
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
         setLoading(true);
-        const data = await getTransactionHistory();
-        setTransactions(data);
+        const response = await getTransactionHistory(); // Assuming it returns { transactions: [...] }
+        console.log("Fetched transactions:", response);
+        // Ensure that `response` has a `transactions` array, otherwise default to empty
+        setTransactions(response.transactions || []);
       } catch (err) {
         setError("Failed to fetch transactions.");
         console.error("Error fetching transactions:", err);
@@ -28,7 +33,18 @@ const DashboardPage = () => {
     };
 
     fetchTransactions();
-  }, []); // Empty dependency array means this runs once on mount
+  }, [userId]); // Re-fetch if userId changes
+
+  // Helper function to generate transaction description
+  const getTransactionDescription = (tx) => {
+    if (tx.type === "credit" && tx.toUser?._id === userId) {
+      return `Received from ${tx.fromUser?.name || "Unknown User"}`;
+    } else if (tx.type === "debit" && tx.fromUser?._id === userId) {
+      return `Sent to ${tx.toUser?.name || "Unknown User"}`;
+    }
+    // Fallback for other types or cases
+    return `Transaction ${tx.type}`;
+  };
 
   return (
     <div className="p-8 bg-base-100 min-h-screen">
@@ -72,20 +88,25 @@ const DashboardPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((tx, index) => (
-                  <tr key={tx.id} className="hover">
-                    <th>{index + 1}</th>
-                    <td>{tx.description}</td>
-                    <td
-                      className={
-                        tx.amount > 0 ? "text-success" : "text-error"
-                      }
-                    >
-                      {tx.amount > 0 ? "+" : ""}${Math.abs(tx.amount).toFixed(2)}
-                    </td>
-                    <td>{new Date(tx.date).toLocaleDateString()}</td>
-                  </tr>
-                ))}
+                {transactions.map((tx, index) => {
+                  const isIncoming = tx.toUser?._id === userId;
+                  const displayAmount = isIncoming ? tx.amount : -tx.amount; // Make outgoing transactions negative
+                  const amountClassName = isIncoming ? "text-success" : "text-error";
+
+                  return (
+                    <tr key={tx._id} className="hover">
+                      <th>{index + 1}</th>
+                      <td>{getTransactionDescription(tx)}</td>
+                      <td className={amountClassName}>
+                        {displayAmount > 0 ? "+" : ""}$
+                        {Math.abs(displayAmount).toFixed(2)}
+                      </td>
+                      <td>
+                        {new Date(tx.createdAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
