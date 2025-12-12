@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
 import { useSelector } from "react-redux";
-import { getWalletDetails } from "../services/api";
+import { getWalletBalanceWithPin } from "../services/api"; // Import getWalletBalanceWithPin
 
 const UserWalletSummary = () => {
   const [displayedBalance, setDisplayedBalance] = useState("**.**"); // Dummy balance
-  const [walletDetails, setWalletDetails] = useState(null);
+  // const [walletDetails, setWalletDetails] = useState(null); // Removed as it's not used
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user, isAuthenticated } = useSelector((state) => state.auth);
@@ -43,7 +43,7 @@ const UserWalletSummary = () => {
     try {
       const response = await getWalletBalanceWithPin(pin); // New API call
       setDisplayedBalance(response.balance.toFixed(2));
-      setWalletDetails(response); // Store full details if needed
+      // setWalletDetails(response); // Store full details if needed - removed as walletDetails is not used
     } catch (err) {
       setError(err.message || "Failed to fetch balance with PIN.");
       setDisplayedBalance("Error"); // Display error state on balance

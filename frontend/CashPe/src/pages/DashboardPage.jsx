@@ -6,15 +6,29 @@ import {
 } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import UserWalletSummary from "../components/UserWalletSummary";
+import { getTransactionHistory } from "../services/api"; // Import the new API function
 
 const DashboardPage = () => {
-  const recentTransactions = [
-    { id: 1, description: "Sent to John Doe", amount: -500, date: "2024-01-01" },
-    { id: 2, description: "Added from Bank", amount: 1000, date: "2023-12-31" },
-    { id: 3, description: "Received from Jane D.", amount: 200, date: "2023-12-30" },
-  ];
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        setLoading(true);
+        const data = await getTransactionHistory();
+        setTransactions(data);
+      } catch (err) {
+        setError("Failed to fetch transactions.");
+        console.error("Error fetching transactions:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []); // Empty dependency array means this runs once on mount
 
   return (
     <div className="p-8 bg-base-100 min-h-screen">
@@ -41,34 +55,41 @@ const DashboardPage = () => {
       {/* Recent Transactions */}
       <div>
         <h2 className="text-2xl font-bold mb-4">Recent Transactions</h2>
-        <div className="overflow-x-auto">
-          <table className="table w-full">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentTransactions.map((tx, index) => (
-                <tr key={tx.id} className="hover">
-                  <th>{index + 1}</th>
-                  <td>{tx.description}</td>
-                  <td
-                    className={
-                      tx.amount > 0 ? "text-success" : "text-error"
-                    }
-                  >
-                    {tx.amount > 0 ? "+" : ""}${Math.abs(tx.amount).toFixed(2)}
-                  </td>
-                  <td>{tx.date}</td>
+        {loading && <p>Loading transactions...</p>}
+        {error && <p className="text-error">{error}</p>}
+        {!loading && !error && transactions.length === 0 && (
+          <p>No recent transactions found.</p>
+        )}
+        {!loading && !error && transactions.length > 0 && (
+          <div className="overflow-x-auto">
+            <table className="table w-full">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Description</th>
+                  <th>Amount</th>
+                  <th>Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {transactions.map((tx, index) => (
+                  <tr key={tx.id} className="hover">
+                    <th>{index + 1}</th>
+                    <td>{tx.description}</td>
+                    <td
+                      className={
+                        tx.amount > 0 ? "text-success" : "text-error"
+                      }
+                    >
+                      {tx.amount > 0 ? "+" : ""}${Math.abs(tx.amount).toFixed(2)}
+                    </td>
+                    <td>{new Date(tx.date).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

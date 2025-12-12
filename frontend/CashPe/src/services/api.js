@@ -50,3 +50,13 @@ export const getWalletBalanceWithPin = async (pin) => {
     throw error.response.data;
   }
 };
+
+export const getTransactionHistory = async () => {
+  try {
+    const response = await api.get("/auth/history");
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
