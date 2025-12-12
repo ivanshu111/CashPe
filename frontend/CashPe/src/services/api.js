@@ -33,18 +33,18 @@ export const login = async (email, password) => {
   }
 };
 
-export const getWalletBalance = async () => {
+export const getWalletDetails = async () => {
   try {
-    const response = await api.get("/wallet/balance");
+    const response = await api.get("/wallet/details");
     return response.data;
   } catch (error) {
     throw error.response.data;
   }
 };
 
-export const getWalletDetails = async () => {
+export const getWalletBalanceWithPin = async (pin) => {
   try {
-    const response = await api.get("/wallet/details");
+    const response = await api.post("/wallet/balance", { pin });
     return response.data;
   } catch (error) {
     throw error.response.data;
