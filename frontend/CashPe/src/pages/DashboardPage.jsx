@@ -103,7 +103,7 @@ const DashboardPage = () => {
                       <th>{index + 1}</th>
                       <td>{getTransactionDescription(tx)}</td>
                       <td className={amountClassName}>
-                        {displayAmount > 0 ? "+" : ""}$
+                        {displayAmount > 0 ? "+" : ""}₹
                         {Math.abs(displayAmount).toFixed(2)}
                       </td>
                       <td>
