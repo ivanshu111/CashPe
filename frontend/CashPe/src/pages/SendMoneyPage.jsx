@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { sendMoney, findUserByPhoneOrEmail } from '../services/api'; // Import API functions
-import { CurrencyRupeeIcon, UserCircleIcon, SearchIcon, ArrowLeftIcon } from "@heroicons/react/24/outline"; // Import icons
+import { CurrencyRupeeIcon, UserCircleIcon, MagnifyingGlassIcon, ArrowLeftIcon } from "@heroicons/react/24/outline"; // Import icons
 import { debounce } from 'lodash'; // Using lodash for debouncing, assuming it's available or will be installed
 
 const SendMoneyPage = () => {
@@ -88,6 +88,11 @@ const SendMoneyPage = () => {
 
     setLoading(true);
     try {
+      console.log("Sending money with:", {
+        toUserId: selectedRecipient._id,
+        amount: parsedAmount,
+        pin: pin,
+      });
       const response = await sendMoney(selectedRecipient._id, parsedAmount, pin);
       setSuccessMessage(response.message || `Successfully sent ₹${parsedAmount.toFixed(2)} to ${selectedRecipient.name || selectedRecipient.email}!`);
       setAmount('');
@@ -143,7 +148,7 @@ const SendMoneyPage = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <UserCircleIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-7 w-7 text-gray-400" />
+                <MagnifyingGlassIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-7 w-7 text-gray-400" />
               </div>
             </div>
 
