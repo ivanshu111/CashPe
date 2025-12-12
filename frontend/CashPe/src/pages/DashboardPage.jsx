@@ -37,13 +37,18 @@ const DashboardPage = () => {
 
   // Helper function to generate transaction description
   const getTransactionDescription = (tx) => {
-    if (tx.type === "credit" && tx.toUser?._id === userId) {
-      return `Received from ${tx.fromUser?.name || "Unknown User"}`;
-    } else if (tx.type === "debit" && tx.fromUser?._id === userId) {
-      return `Sent to ${tx.toUser?.name || "Unknown User"}`;
+    const fromUserName = tx.fromUser?.name || "Unknown User";
+    const toUserName = tx.toUser?.name || "Unknown User";
+
+    if (tx.type === "credit") {
+      // Assuming credit means money was received by toUser
+      return `Transfer from ${fromUserName} to ${toUserName}`;
+    } else if (tx.type === "debit") {
+      // Assuming debit means money was sent by fromUser
+      return `Transfer from ${fromUserName} to ${toUserName}`;
     }
     // Fallback for other types or cases
-    return `Transaction ${tx.type}`;
+    return `Transaction ${tx.type}: from ${fromUserName} to ${toUserName}`;
   };
 
   return (
