@@ -26,6 +26,7 @@ api.interceptors.request.use(
 export const login = async (email, password) => {
   try {
     const response = await api.post("/auth/login", { email, password });
+
     return response.data;
   } catch (error) {
     throw error.response.data;
@@ -35,6 +36,15 @@ export const login = async (email, password) => {
 export const getWalletBalance = async () => {
   try {
     const response = await api.get("/wallet/balance");
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const getWalletDetails = async () => {
+  try {
+    const response = await api.get("/wallet/details");
     return response.data;
   } catch (error) {
     throw error.response.data;

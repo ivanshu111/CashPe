@@ -2,23 +2,23 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
 import { useSelector } from "react-redux";
-import { getWalletBalance } from "../services/api";
+import { getWalletDetails } from "../services/api";
 
 const UserWalletSummary = () => {
-  const [walletBalance, setWalletBalance] = useState(0);
+  const [walletDetails, setWalletDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    const fetchWalletBalance = async () => {
+    const fetchWalletData = async () => {
       if (!isAuthenticated) {
         setLoading(false);
         return;
       }
       try {
-        const response = await getWalletBalance();
-        setWalletBalance(response.balance); // Assuming the API returns { balance: 5000 }
+        const response = await getWalletDetails();
+        setWalletDetails(response);
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -26,7 +26,7 @@ const UserWalletSummary = () => {
       }
     };
 
-    fetchWalletBalance();
+    fetchWalletData();
   }, [isAuthenticated]);
 
   if (loading) {
@@ -54,7 +54,7 @@ const UserWalletSummary = () => {
       <div className="card-body flex-row justify-between items-center">
         <div>
           <h2 className="card-title text-2xl">Hello, {user?.name || "User"}!</h2>
-          <p className="text-5xl font-bold">${walletBalance.toFixed(2)}</p>
+          <p className="text-5xl font-bold">${walletDetails?.balance?.toFixed(2) || "0.00"}</p>
           <p className="text-lg">Current Balance</p>
         </div>
         <div className="card-actions">
