@@ -70,3 +70,21 @@ export const addMoney = async (amount) => {
   }
 };
 
+export const findUserByPhoneOrEmail = async (query) => {
+  try {
+    const response = await api.get("/users/find", { params: query });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const sendMoney = async (toUserId, amount, pin) => {
+  try {
+    const response = await api.post("/wallet/send-money", { toUserId, amount, pin });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
