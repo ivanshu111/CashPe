@@ -11,11 +11,21 @@ const AddMoneyPage = () => {
     if (successMessage) {
       const timer = setTimeout(() => {
         setSuccessMessage(null);
-      }, 2000); // Vanish after 2 seconds
+      }, 3000); // Vanish after 3 seconds
 
       return () => clearTimeout(timer); // Cleanup on unmount or message change
     }
   }, [successMessage]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 3000); // Vanish after 3 seconds
+
+      return () => clearTimeout(timer); // Cleanup on unmount or error change
+    }
+  }, [error]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
