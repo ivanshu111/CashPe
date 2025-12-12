@@ -1,14 +1,18 @@
-import { Disclosure } from "@headlessui/react";
+import { Disclosure, Menu, Transition } from "@headlessui/react";
 import {
   Bars3Icon,
   XMarkIcon,
   BellIcon,
+  UserCircleIcon,
 } from "@heroicons/react/24/outline";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../slice/authSlice";
+import { Fragment } from "react";
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", current: true },
-  { name: "About", href: "/about", current: false },
+  { name: "Dashboard", href: "/dashboard", current: true, protected: true },
+  { name: "About", href: "/about", current: false, protected: false },
 ];
 
 function classNames(...classes) {
@@ -16,7 +20,17 @@ function classNames(...classes) {
 }
 
 export default function Navbar() {
-  const isAuthenticated = false;
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const user = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
+
+  const filteredNavigation = navigation.filter(item => !item.protected || isAuthenticated);
 
   return (
     <Disclosure as="nav" className="bg-base-100 text-base-content">
@@ -39,12 +53,14 @@ export default function Navbar() {
               <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="flex flex-shrink-0 items-center">
                   <Link to="/">
-                    <h1 className="text-base-content text-2xl font-bold">CashPe</h1>
+                    <h1 className="text-base-content text-2xl font-bold">
+                      CashPe
+                    </h1>
                   </Link>
                 </div>
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
-                    {navigation.map((item) => (
+                    {filteredNavigation.map((item) => (
                       <Link
                         key={item.name}
                         to={item.href}
@@ -73,25 +89,76 @@ export default function Navbar() {
                       <span className="sr-only">View notifications</span>
                       <BellIcon className="h-6 w-6" aria-hidden="true" />
                     </button>
-                    <div className="relative ml-3">
+
+                    {/* Profile dropdown */}
+                    <Menu as="div" className="relative ml-3">
                       <div>
-                        <button
-                          type="button"
-                          className="relative flex rounded-full bg-base-100 text-sm focus:outline-none focus:ring-2 focus:ring-base-content focus:ring-offset-2 focus:ring-offset-base-100"
-                          id="user-menu-button"
-                          aria-expanded="false"
-                          aria-haspopup="true"
-                        >
+                        <Menu.Button className="relative flex rounded-full bg-base-100 text-sm focus:outline-none focus:ring-2 focus:ring-base-content focus:ring-offset-2 focus:ring-offset-base-100">
                           <span className="absolute -inset-1.5" />
                           <span className="sr-only">Open user menu</span>
-                          <img
-                            className="h-8 w-8 rounded-full"
-                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                            alt=""
-                          />
-                        </button>
+                          {user && user.profileImage ? (
+                            <img
+                              className="h-8 w-8 rounded-full"
+                              src={user.profileImage}
+                              alt="User Profile"
+                            />
+                          ) : (
+                            <UserCircleIcon className="h-8 w-8 rounded-full text-base-content" />
+                          )}
+                        </Menu.Button>
                       </div>
-                    </div>
+                      <Transition
+                        as={Fragment}
+                        enter="transition ease-out duration-100"
+                        enterFrom="transform opacity-0 scale-95"
+                        enterTo="transform opacity-100 scale-100"
+                        leave="transition ease-in duration-75"
+                        leaveFrom="transform opacity-100 scale-100"
+                        leaveTo="transform opacity-0 scale-95"
+                      >
+                        <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-base-100 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          <Menu.Item>
+                            {({ active }) => (
+                              <a
+                                href="#"
+                                className={classNames(
+                                  active ? "bg-base-200" : "",
+                                  "block px-4 py-2 text-sm text-base-content"
+                                )}
+                              >
+                                Your Profile
+                              </a>
+                            )}
+                          </Menu.Item>
+                          <Menu.Item>
+                            {({ active }) => (
+                              <a
+                                href="#"
+                                className={classNames(
+                                  active ? "bg-base-200" : "",
+                                  "block px-4 py-2 text-sm text-base-content"
+                                )}
+                              >
+                                Settings
+                              </a>
+                            )}
+                          </Menu.Item>
+                          <Menu.Item>
+                            {({ active }) => (
+                              <a
+                                onClick={handleLogout}
+                                className={classNames(
+                                  active ? "bg-base-200" : "",
+                                  "block px-4 py-2 text-sm text-base-content cursor-pointer"
+                                )}
+                              >
+                                Sign out
+                              </a>
+                            )}
+                          </Menu.Item>
+                        </Menu.Items>
+                      </Transition>
+                    </Menu>
                   </>
                 ) : (
                   <div className="flex space-x-4">
@@ -115,7 +182,7 @@ export default function Navbar() {
 
           <Disclosure.Panel className="sm:hidden">
             <div className="space-y-1 px-2 pb-3 pt-2">
-              {navigation.map((item) => (
+              {filteredNavigation.map((item) => (
                 <Disclosure.Button
                   key={item.name}
                   as="a"
