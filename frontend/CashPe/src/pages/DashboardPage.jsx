@@ -9,8 +9,12 @@ import UserWalletSummary from "../components/UserWalletSummary";
 
 const DashboardPage = () => {
   const recentTransactions = [
+    { id: 1, description: "Sent to John Doe", amount: -500, date: "2024-01-01" },
+    { id: 2, description: "Added from Bank", amount: 1000, date: "2023-12-31" },
+    { id: 3, description: "Received from Jane D.", amount: 200, date: "2023-12-30" },
+  ];
 
-  return (
+  
 
   return (
     <div className="p-8 bg-base-100 min-h-screen">
