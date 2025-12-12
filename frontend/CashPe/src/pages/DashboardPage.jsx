@@ -21,7 +21,7 @@ const DashboardPage = () => {
       try {
         setLoading(true);
         const response = await getTransactionHistory(); // Assuming it returns { transactions: [...] }
-        console.log("Fetched transactions:", response);
+
         // Ensure that `response` has a `transactions` array, otherwise default to empty
         setTransactions(response.transactions || []);
       } catch (err) {
@@ -67,7 +67,9 @@ const DashboardPage = () => {
             <h2 className="card-title">Send Money</h2>
             <p>Send money to other CashPe users instantly.</p>
             <div className="card-actions justify-center mt-4">
-              <button className="btn btn-primary">Send Money</button>
+              <Link to="/send-money" className="btn btn-primary">
+              Send Money
+            </Link>
             </div>
           </div>
         </div>
@@ -96,7 +98,9 @@ const DashboardPage = () => {
                 {transactions.map((tx, index) => {
                   const isIncoming = tx.toUser?._id === userId;
                   const displayAmount = isIncoming ? tx.amount : -tx.amount; // Make outgoing transactions negative
-                  const amountClassName = isIncoming ? "text-success" : "text-error";
+                  const amountClassName = isIncoming
+                    ? "text-success"
+                    : "text-error";
 
                   return (
                     <tr key={tx._id} className="hover">
@@ -106,9 +110,7 @@ const DashboardPage = () => {
                         {displayAmount > 0 ? "+" : ""}₹
                         {Math.abs(displayAmount).toFixed(2)}
                       </td>
-                      <td>
-                        {new Date(tx.createdAt).toLocaleDateString()}
-                      </td>
+                      <td>{new Date(tx.createdAt).toLocaleDateString()}</td>
                     </tr>
                   );
                 })}

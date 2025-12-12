@@ -6,6 +6,7 @@ import HomePage from "../pages/HomePage.jsx";
 import AboutPage from "../pages/AboutPage.jsx";
 import DashboardPage from "../pages/DashboardPage.jsx";
 import AddMoneyPage from "../pages/AddMoneyPage.jsx"; // Import AddMoneyPage
+import SendMoneyPage from "../pages/SendMoneyPage.jsx"; // Import SendMoneyPage
 
 const router = createBrowserRouter([
   {
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
       {
         path: "/add-money", // New route for AddMoneyPage
         element: <AddMoneyPage />,
+      },
+      {
+        path: "/send-money", // New route for SendMoneyPage
+        element: <SendMoneyPage />,
       },
     ],
   },
