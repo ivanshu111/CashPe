@@ -88,11 +88,6 @@ const SendMoneyPage = () => {
 
     setLoading(true);
     try {
-      console.log("Sending money with:", {
-        toUserId: selectedRecipient._id,
-        amount: parsedAmount,
-        pin: pin,
-      });
       const response = await sendMoney(selectedRecipient._id, parsedAmount, pin);
       setSuccessMessage(response.message || `Successfully sent ₹${parsedAmount.toFixed(2)} to ${selectedRecipient.name || selectedRecipient.email}!`);
       setAmount('');
