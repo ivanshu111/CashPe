@@ -4,6 +4,8 @@ import Login from "../pages/LoginPage.jsx";
 import Register from "../pages/RegisterPage.jsx";
 import HomePage from "../pages/HomePage.jsx";
 import AboutPage from "../pages/AboutPage.jsx";
+import DashboardPage from "../pages/DashboardPage.jsx";
+import AddMoneyPage from "../pages/AddMoneyPage.jsx"; // Import AddMoneyPage
 
 const router = createBrowserRouter([
   {
@@ -25,6 +27,14 @@ const router = createBrowserRouter([
       {
         path: "/about",
         element: <AboutPage />,
+      },
+      {
+        path: "/dashboard",
+        element: <DashboardPage />,
+      },
+      {
+        path: "/add-money", // New route for AddMoneyPage
+        element: <AddMoneyPage />,
       },
     ],
   },
