@@ -18,13 +18,11 @@ exports.getAllUsers = async (req, res, next) => {
 // @route   GET /api/admin/transactions
 // @access  Admin
 exports.getAllTransactions = async (req, res, next) => {
-  console.log("getAllTransactions function executed in backend."); // New log
   try {
     const transactions = await Transaction.find({})
       .populate("fromUser", "name email")
       .populate("toUser", "name email")
       .sort({ createdAt: -1 });
-    console.log("Backend getAllTransactions length:", transactions.length); // Debug log
     res.status(200).json({ transactions });
   } catch (error) {
     next(error);
