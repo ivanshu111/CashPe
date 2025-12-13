@@ -106,3 +106,40 @@ export const updateUserProfile = async (formData) => {
   }
 };
 
+// Admin API calls
+export const getAllUsers = async () => {
+  try {
+    const response = await api.get("/admin/users");
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const getAllTransactions = async () => {
+  try {
+    const response = await api.get("/admin/transactions");
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const updateUserStatus = async (userId, status) => {
+  try {
+    const response = await api.put(`/admin/users/${userId}/status`, { status });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const getUserDetails = async (userId) => {
+  try {
+    const response = await api.get(`/admin/users/${userId}/details`);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+

@@ -1,70 +1,57 @@
 const express = require("express");
 const router = express.Router();
-const { getAllUsers, getAllTransactions, updateUserStatus, getDetailedUserView } = require("../controllers/adminController");
-const adminAuth = require("../middlewares/adminAuth");
+const adminController = require("../controllers/adminController");
+const auth = require("../middlewares/auth"); // Assuming auth middleware exists
+const adminAuth = require("../middlewares/adminAuth"); // Custom middleware for admin role check
+
+// Protect all admin routes with authentication and admin role check
+router.use(auth);
+router.use(adminAuth);
 
 /**
  * @swagger
  * /api/admin/users:
  *   get:
  *     summary: Get all users
- *     description: Get a paginated list of all users.
+ *     description: Retrieve a list of all users. Accessible only by admin.
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *         description: The page number to retrieve.
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *         description: The number of users to retrieve per page.
  *     responses:
  *       200:
- *         description: A paginated list of users
+ *         description: A list of users.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized.
+ *       403:
+ *         description: Forbidden, only admins can access.
  */
-router.get("/users", adminAuth, getAllUsers);
+router.get("/users", adminController.getAllUsers);
 
 /**
  * @swagger
  * /api/admin/transactions:
  *   get:
  *     summary: Get all transactions
- *     description: Get a paginated list of all transactions.
+ *     description: Retrieve a list of all transactions. Accessible only by admin.
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *         description: The page number to retrieve.
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *         description: The number of transactions to retrieve per page.
  *     responses:
  *       200:
- *         description: A paginated list of transactions
+ *         description: A list of all transactions.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized.
+ *       403:
+ *         description: Forbidden, only admins can access.
  */
-router.get("/transactions", adminAuth, getAllTransactions);
+router.get("/transactions", adminController.getAllTransactions);
 
 /**
  * @swagger
  * /api/admin/users/{userId}/status:
  *   put:
  *     summary: Update user status
- *     description: Update the status of a user (e.g., freeze/unfreeze).
+ *     description: Update a specific user's status to active or inactive. Accessible only by admin.
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
@@ -74,35 +61,37 @@ router.get("/transactions", adminAuth, getAllTransactions);
  *         required: true
  *         schema:
  *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               isFrozen:
- *                 type: boolean
+ *         description: The ID of the user to update.
+ *       - in: body
+ *         name: status
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             status:
+ *               type: string
+ *               enum: [active, inactive]
+ *         description: The new status for the user.
  *     responses:
  *       200:
- *         description: User status updated successfully
+ *         description: User status updated successfully.
+ *       400:
+ *         description: Invalid status provided.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized.
+ *       403:
+ *         description: Forbidden, only admins can access.
  *       404:
- *         description: User not found
+ *         description: User not found.
  */
-router.put(
-  "/users/:userId/status",
-  adminAuth,
-  updateUserStatus
-);
+router.put("/users/:userId/status", adminController.updateUserStatus);
 
 /**
  * @swagger
  * /api/admin/users/{userId}/details:
  *   get:
- *     summary: Get detailed user view
- *     description: Get a detailed view of a single user, including a paginated list of their transactions.
+ *     summary: Get user details
+ *     description: Get a consolidated, detailed view of a single user. Accessible only by admin.
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
@@ -112,24 +101,17 @@ router.put(
  *         required: true
  *         schema:
  *           type: string
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *         description: The page number for the transaction list.
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *         description: The number of transactions to retrieve per page.
+ *         description: The ID of the user to retrieve details for.
  *     responses:
  *       200:
- *         description: Detailed user view retrieved successfully
+ *         description: User details retrieved successfully.
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized.
+ *       403:
+ *         description: Forbidden, only admins can access.
  *       404:
- *         description: User not found
+ *         description: User not found.
  */
-router.get("/users/:userId/details", adminAuth, getDetailedUserView);
+router.get("/users/:userId/details", adminController.getUserDetails);
 
 module.exports = router;
