@@ -129,10 +129,10 @@ const updateUserProfile = async (req, res, next) => {
       user.phone = phone;
     }
     if (password) {
-      user.password = password; // Pass plain text password
+      user.password = await hashPassword(password);
     }
     if (pin) {
-      user.pin = pin;
+      user.pin = await hashPassword(pin);
     }
 
     // Handle profile picture update
@@ -140,7 +140,7 @@ const updateUserProfile = async (req, res, next) => {
       // Delete old profile picture if it's not the default one
       const defaultProfilePicture = "https://www.cielhr.com/wp-content/uploads/2020/10/dummy-image.jpg";
       if (user.profilePicture && user.profilePicture !== defaultProfilePicture) {
-        const oldProfilePicturePath = path.join(__dirname, '..', '..', user.profilePicture);
+        const oldProfilePicturePath = path.join(__dirname, '..', 'public', user.profilePicture.replace('/public', ''));
         fs.unlink(oldProfilePicturePath, (err) => {
           if (err) console.error('Error deleting old profile picture:', err);
         });
@@ -150,7 +150,7 @@ const updateUserProfile = async (req, res, next) => {
 
     await user.save();
 
-    res.status(200).json({ message: "Profile updated successfully" });
+    res.status(200).json({ message: "Profile updated successfully", user });
   } catch (error) {
     // If an error occurs after file upload, delete the uploaded file
     if (req.file) {

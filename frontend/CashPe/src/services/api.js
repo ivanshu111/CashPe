@@ -3,7 +3,7 @@ import store from "../store";
 
 const API_BASE_URL = "/api";
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
@@ -13,6 +13,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = store.getState().auth.token;
+    console.log('Sending token:', token); // Added logging
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
@@ -91,3 +92,17 @@ export const sendMoney = async (toUser, amount, pin) => {
     throw error.response.data;
   }
 };
+
+export const updateUserProfile = async (formData) => {
+  try {
+    const response = await api.patch("/auth/profile", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+

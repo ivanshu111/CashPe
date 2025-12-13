@@ -5,8 +5,11 @@ import Register from "../pages/RegisterPage.jsx";
 import HomePage from "../pages/HomePage.jsx";
 import AboutPage from "../pages/AboutPage.jsx";
 import DashboardPage from "../pages/DashboardPage.jsx";
-import AddMoneyPage from "../pages/AddMoneyPage.jsx"; // Import AddMoneyPage
-import SendMoneyPage from "../pages/SendMoneyPage.jsx"; // Import SendMoneyPage
+import AddMoneyPage from "../pages/AddMoneyPage.jsx";
+import SendMoneyPage from "../pages/SendMoneyPage.jsx";
+import ProfilePage from "../pages/ProfilePage.jsx";
+import EditProfilePage from "../pages/EditProfilePage.jsx"; // Import EditProfilePage
+import ProtectedRoute from "../components/ProtectedRoute.jsx";
 
 const router = createBrowserRouter([
   {
@@ -30,16 +33,30 @@ const router = createBrowserRouter([
         element: <AboutPage />,
       },
       {
-        path: "/dashboard",
-        element: <DashboardPage />,
-      },
-      {
-        path: "/add-money", // New route for AddMoneyPage
-        element: <AddMoneyPage />,
-      },
-      {
-        path: "/send-money", // New route for SendMoneyPage
-        element: <SendMoneyPage />,
+        // Protected routes
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: "/dashboard",
+            element: <DashboardPage />,
+          },
+          {
+            path: "/add-money",
+            element: <AddMoneyPage />,
+          },
+          {
+            path: "/send-money",
+            element: <SendMoneyPage />,
+          },
+          {
+            path: "/profile",
+            element: <ProfilePage />,
+          },
+          {
+            path: "/profile/edit", // New route for EditProfilePage
+            element: <EditProfilePage />,
+          },
+        ],
       },
     ],
   },

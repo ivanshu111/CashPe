@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { login } from "../services/api";
+import { login, api } from "../services/api"; // Import api instance
 import { loginSuccess } from "../slice/authSlice";
 
 const LoginPage = () => {
@@ -17,6 +17,8 @@ const LoginPage = () => {
     try {
       const data = await login(email, password);
       dispatch(loginSuccess({ user: data.user, token: data.token }));
+      // Set the default authorization header for axios after successful login
+      api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       navigate("/dashboard");
     } catch (err) {
       setError(err.message);

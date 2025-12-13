@@ -49,12 +49,6 @@ const userSchema = new mongoose.Schema(
     },
     pin: {
       type: String,
-      validate: {
-        validator: function (v) {
-          return /^\d{4}$/.test(v);
-        },
-        message: "Pin must be a 4-digit number",
-      },
     },
     profilePicture: {
       type: String,
