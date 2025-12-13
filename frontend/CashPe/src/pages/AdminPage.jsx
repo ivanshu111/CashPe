@@ -139,14 +139,18 @@ const AdminPage = () => {
       <div role="tablist" className="tabs tabs-boxed mb-8 w-full">
         <a
           role="tab"
-          className={`tab ${activeTab === "users" ? "tab-active" : ""}`}
+          className={`tab ${
+            activeTab === "users" ? "tab-active bg-primary text-primary-content" : "bg-base-200 text-base-content hover:bg-base-300"
+          }`}
           onClick={() => setActiveTab("users")}
         >
           User Management
         </a>
         <a
           role="tab"
-          className={`tab ${activeTab === "transactions" ? "tab-active" : ""}`}
+          className={`tab ${
+            activeTab === "transactions" ? "tab-active bg-primary text-primary-content" : "bg-base-200 text-base-content hover:bg-base-300"
+          }`}
           onClick={() => setActiveTab("transactions")}
         >
           Transaction Management
