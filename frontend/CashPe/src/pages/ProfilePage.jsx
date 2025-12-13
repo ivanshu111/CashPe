@@ -1,11 +1,15 @@
-import React from "react";
-import { useSelector } from "react-redux";
+import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
+import { deleteUserAccount } from "../services/api";
+import { logout } from "../slice/authSlice";
 
 const ProfilePage = () => {
   const { user } = useSelector((state) => state.auth);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [isDeleting, setIsDeleting] = useState(false);
 
   if (!user) {
     return (
@@ -16,6 +20,28 @@ const ProfilePage = () => {
       </div>
     );
   }
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+      setIsDeleting(true);
+      try {
+        await deleteUserAccount();
+        dispatch(logout()); // Log out the user from the frontend
+        alert("Your account has been successfully deleted.");
+        navigate("/"); // Redirect to home or login page
+      } catch (error) {
+        let errorMessage = "Failed to delete account. Please try again.";
+        if (error.response && error.response.data && error.response.data.message) {
+          errorMessage = error.response.data.message;
+        }
+        alert(errorMessage);
+        console.error("Error deleting account:", error);
+      } finally {
+        setIsDeleting(false);
+      }
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 mt-12">
       <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
@@ -75,14 +101,14 @@ const ProfilePage = () => {
 
           <div className="flex flex-col gap-1">
             <span className="text-sm text-gray-500">Last Updated</span>
-            <span className="text-gray-800 font-medium">
+            <span className="text-800 font-medium">
               {new Date(user.updatedAt).toLocaleDateString()}
             </span>
           </div>
         </div>
 
         {/* Action Button */}
-        <div className="mt-12 flex justify-end">
+        <div className="mt-12 flex justify-end gap-4">
           <button
             onClick={() => navigate("/profile/edit")}
             className="px-7 py-3 rounded-xl font-semibold
@@ -92,6 +118,17 @@ const ProfilePage = () => {
                      transition-all duration-300"
           >
             Edit Profile
+          </button>
+          <button
+            onClick={handleDeleteAccount}
+            disabled={isDeleting}
+            className="px-7 py-3 rounded-xl font-semibold
+                     bg-red-600 text-white
+                     shadow-sm hover:bg-red-700
+                     hover:shadow-md hover:scale-105
+                     transition-all duration-300"
+          >
+            {isDeleting ? "Deleting..." : "Delete Account"}
           </button>
         </div>
       </div>

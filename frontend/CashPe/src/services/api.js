@@ -143,3 +143,12 @@ export const getUserDetails = async (userId) => {
   }
 };
 
+export const deleteUserAccount = async () => {
+  try {
+    const response = await api.delete("/users");
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
