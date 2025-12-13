@@ -4,12 +4,16 @@ import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import { deleteUserAccount } from "../services/api";
 import { logout } from "../slice/authSlice";
+import DeleteConfirmationModal from "../components/DeleteConfirmationModal"; // Import the new modal
+import toast from "react-hot-toast"; // Import toast
 
 const ProfilePage = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // State for modal visibility
+  const [deleteError, setDeleteError] = useState(null); // State for error messages in modal
 
   if (!user) {
     return (
@@ -21,23 +25,37 @@ const ProfilePage = () => {
     );
   }
 
-  const handleDeleteAccount = async () => {
-    if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-      setIsDeleting(true);
-      try {
-        await deleteUserAccount();
-        dispatch(logout()); // Log out the user from the frontend
-        alert("Your account has been successfully deleted.");
-        navigate("/"); // Redirect to home or login page
-      } catch (error) {
-        let errorMessage = "Failed to delete account. Please try again.";
-        if (error.response && error.response.data && error.response.data.message) {
-          errorMessage = error.response.data.message;
-        }
-        alert(errorMessage);
-        console.error("Error deleting account:", error);
-      } finally {
-        setIsDeleting(false);
+  const handleDeleteAccountClick = () => {
+    setDeleteError(null); // Clear any previous errors
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeletion = async () => {
+    setIsDeleting(true);
+    setDeleteError(null); // Clear previous errors before attempting deletion
+    try {
+      await deleteUserAccount();
+      dispatch(logout()); // Log out the user from the frontend
+      toast.success("Your account has been successfully deleted.");
+      navigate("/"); // Redirect to home or login page
+    } catch (error) {
+      let errorMessage = "Failed to delete account. Please try again.";
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        errorMessage = error.response.data.message;
+      }
+      setDeleteError(errorMessage); // Set error for display in modal
+      toast.error(errorMessage); // Show toast notification for error
+      console.error("Error deleting account:", error);
+    } finally {
+      setIsDeleting(false);
+      // If there's an error, keep the modal open to show the error.
+      // Otherwise, close it after successful deletion.
+      if (!deleteError) {
+        setShowDeleteModal(false);
       }
     }
   };
@@ -120,7 +138,7 @@ const ProfilePage = () => {
             Edit Profile
           </button>
           <button
-            onClick={handleDeleteAccount}
+            onClick={handleDeleteAccountClick} // Changed to open modal
             disabled={isDeleting}
             className="px-7 py-3 rounded-xl font-semibold
                      bg-red-600 text-white
@@ -128,10 +146,19 @@ const ProfilePage = () => {
                      hover:shadow-md hover:scale-105
                      transition-all duration-300"
           >
-            {isDeleting ? "Deleting..." : "Delete Account"}
+            Delete Account
           </button>
         </div>
       </div>
+
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDeletion}
+        message="Are you sure you want to delete your account? This action cannot be undone."
+        error={deleteError}
+        isConfirming={isDeleting}
+      />
     </div>
   );
 };
