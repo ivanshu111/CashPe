@@ -9,6 +9,7 @@ import AddMoneyPage from "../pages/AddMoneyPage.jsx";
 import SendMoneyPage from "../pages/SendMoneyPage.jsx";
 import ProfilePage from "../pages/ProfilePage.jsx";
 import EditProfilePage from "../pages/EditProfilePage.jsx"; // Import EditProfilePage
+import AdminPage from "../pages/AdminPage.jsx"; // Import AdminPage
 import ProtectedRoute from "../components/ProtectedRoute.jsx";
 
 const router = createBrowserRouter([
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
           {
             path: "/profile/edit", // New route for EditProfilePage
             element: <EditProfilePage />,
+          },
+          {
+            path: "/admin",
+            element: <AdminPage />,
           },
         ],
       },

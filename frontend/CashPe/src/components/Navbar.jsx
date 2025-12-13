@@ -13,6 +13,7 @@ import {
 const navigation = [
   { name: "Dashboard", href: "/dashboard", current: true, protected: true },
   { name: "About", href: "/about", current: false, protected: false },
+  { name: "Admin", href: "/admin", current: false, protected: true, adminOnly: true }, // New admin link
 ];
 
 function classNames(...classes) {
@@ -32,7 +33,7 @@ export default function Navbar() {
   };
 
   const filteredNavigation = navigation.filter(
-    (item) => !item.protected || isAuthenticated
+    (item) => !item.protected || (isAuthenticated && (!item.adminOnly || user?.role === 'admin'))
   );
 
   return (
