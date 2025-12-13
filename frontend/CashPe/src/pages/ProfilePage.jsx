@@ -38,6 +38,7 @@ const ProfilePage = () => {
       dispatch(logout()); // Log out the user from the frontend
       toast.success("Your account has been successfully deleted.");
       navigate("/"); // Redirect to home or login page
+      setShowDeleteModal(false); // Close modal only on success
     } catch (error) {
       let errorMessage = "Failed to delete account. Please try again.";
       if (
@@ -52,11 +53,7 @@ const ProfilePage = () => {
       console.error("Error deleting account:", error);
     } finally {
       setIsDeleting(false);
-      // If there's an error, keep the modal open to show the error.
-      // Otherwise, close it after successful deletion.
-      if (!deleteError) {
-        setShowDeleteModal(false);
-      }
+      // The modal will remain open if there's an error because setShowDeleteModal(false) is not called in catch
     }
   };
 
