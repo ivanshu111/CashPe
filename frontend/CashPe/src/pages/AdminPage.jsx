@@ -52,6 +52,7 @@ const AdminPage = () => {
         setLoadingTransactions(true);
         const transactionsData = await getAllTransactions();
         setTransactions(transactionsData.transactions);
+        console.log("Fetched transactions length:", transactionsData.transactions.length); // Debug log
       } catch (err) {
         setErrorTransactions("Failed to fetch transactions.");
         console.error("Error fetching transactions:", err);
