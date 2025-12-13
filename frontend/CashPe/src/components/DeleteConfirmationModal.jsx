@@ -11,23 +11,42 @@ const DeleteConfirmationModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal modal-open">
-      <div className="modal-box relative">
-        <h3 className="font-bold text-lg">Confirm Account Deletion</h3>
-        <p className="py-4">{message}</p>
+    <div className="modal modal-open backdrop-blur-sm">
+      <div className="modal-box relative max-w-md rounded-2xl shadow-2xl bg-base-100 p-6">
+        {/* Icon */}
+        <div className="flex justify-center mb-4">
+          <div className="w-14 h-14 flex items-center justify-center rounded-full bg-red-100 text-red-600 text-2xl">
+            ⚠️
+          </div>
+        </div>
 
+        {/* Title */}
+        <h3 className="font-extrabold text-xl text-center mb-2">
+          Confirm Account Deletion
+        </h3>
+
+        {/* Message */}
+        <p className="text-center text-base-content/70 mb-5">{message}</p>
+
+        {/* Error */}
         {error && (
-          <div className="text-red-500 bg-red-100 p-3 rounded-md mb-4">
+          <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-sm mb-4">
             {error}
           </div>
         )}
 
-        <div className="modal-action">
-          <button className="btn btn-ghost" onClick={onClose} disabled={isConfirming}>
+        {/* Actions */}
+        <div className="flex justify-center gap-4 mt-6">
+          <button
+            className="btn rounded-full px-8 bg-base-200 hover:bg-base-300 border-none"
+            onClick={onClose}
+            disabled={isConfirming}
+          >
             Cancel
           </button>
+
           <button
-            className="btn btn-error"
+            className="btn rounded-full px-8 bg-red-600 hover:bg-red-700 text-white border-none shadow-md"
             onClick={onConfirm}
             disabled={isConfirming}
           >

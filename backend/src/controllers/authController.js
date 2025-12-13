@@ -108,6 +108,8 @@ const loginUser = async (req, res, next) => {
       role: user.role,
       status: user.status,
       profilePicture: user.profilePicture,
+      createdAt: user.createdAt, // Added createdAt
+      updatedAt: user.updatedAt, // Added updatedAt
     };
     res.status(200).json({ token, user: userResponse });
   } catch (error) {
