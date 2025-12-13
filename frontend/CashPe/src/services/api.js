@@ -1,5 +1,7 @@
 import axios from "axios";
 import store from "../store";
+import { logout } from "../slice/authSlice"; // Import logout action
+import toast from "react-hot-toast"; // Import toast for notifications
 
 const API_BASE_URL = "/api";
 
@@ -20,6 +22,21 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Unauthorized, token might be expired or invalid
+      store.dispatch(logout()); // Dispatch logout action
+      toast.error("Session expired or unauthorized. Please log in again.");
+      window.location.href = '/'; // Redirect to home/login page
+    }
     return Promise.reject(error);
   }
 );
