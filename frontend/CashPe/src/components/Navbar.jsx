@@ -130,19 +130,7 @@ export default function Navbar() {
                               </Link>
                             )}
                           </Menu.Item>
-                          <Menu.Item>
-                            {({ active }) => (
-                              <a
-                                href="#"
-                                className={classNames(
-                                  active ? "bg-base-200" : "",
-                                  "block px-4 py-2 text-sm text-base-content"
-                                )}
-                              >
-                                Settings
-                              </a>
-                            )}
-                          </Menu.Item>
+
                           <Menu.Item>
                             {({ active }) => (
                               <a

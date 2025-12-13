@@ -16,69 +16,80 @@ const ProfilePage = () => {
       </div>
     );
   }
-
   return (
-    <div className="container mx-auto p-4 max-w-2xl mt-8">
-      <div className="bg-base-100 shadow-xl rounded-lg p-6">
-        <h2 className="text-3xl font-bold mb-6 text-center text-base-content">
+    <div className="max-w-4xl mx-auto px-4 mt-12">
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
+        {/* Header */}
+        <h2 className="text-3xl font-bold text-gray-800 text-center mb-10">
           User Profile
         </h2>
 
-        <div className="flex flex-col items-center mb-6">
-          {user.profilePicture ? (
-            <img
-              className="h-32 w-32 rounded-full object-cover border-4 border-primary"
-              src={`http://localhost:3000${user.profilePicture.replace(
-                "/public",
-                ""
-              )}`}
-              alt="User Profile"
-              crossOrigin="anonymous"
-            />
-          ) : (
-            <UserCircleIcon className="h-32 w-32 rounded-full text-base-content" />
-          )}
-          <h3 className="text-xl font-semibold mt-4 text-base-content">
-            {user.name}
-          </h3>
+        {/* Profile Section */}
+        <div className="flex flex-col md:flex-row items-center gap-8 mb-10">
+          {/* Profile Image */}
+          <div className="w-40 h-40 rounded-2xl overflow-hidden border border-gray-300 shadow-sm">
+            {user.profilePicture ? (
+              <img
+                src={`http://localhost:3000${user.profilePicture.replace(
+                  "/public",
+                  ""
+                )}`}
+                alt="User Profile"
+                className="w-full h-full object-cover"
+                crossOrigin="anonymous"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                <UserCircleIcon className="h-24 w-24 text-gray-400" />
+              </div>
+            )}
+          </div>
+
+          {/* Name */}
+          <div className="text-center md:text-left">
+            <h3 className="text-2xl font-semibold text-gray-800">
+              {user.name}
+            </h3>
+            <p className="text-gray-500 mt-1">Active User</p>
+          </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="flex justify-between items-center border-b pb-2">
-            <span className="font-medium text-base-content">Email:</span>
-            <span className="text-base-content">{user.email}</span>
-          </div>
-          <div className="flex justify-between items-center border-b pb-2">
-            <span className="font-medium text-base-content">Phone:</span>
-            <span className="text-base-content">{user.phone}</span>
+        {/* Info Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="flex flex-col gap-1">
+            <span className="text-sm text-gray-500">Email</span>
+            <span className="text-gray-800 font-medium">{user.email}</span>
           </div>
 
-          <div className="flex justify-between items-center border-b pb-2">
-            <span className="font-medium text-base-content">
-              Account Created:
-            </span>
-            <span className="text-base-content">
+          <div className="flex flex-col gap-1">
+            <span className="text-sm text-gray-500">Phone</span>
+            <span className="text-gray-800 font-medium">{user.phone}</span>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <span className="text-sm text-gray-500">Account Created</span>
+            <span className="text-gray-800 font-medium">
               {new Date(user.createdAt).toLocaleDateString()}
             </span>
           </div>
-          <div className="flex justify-between items-center border-b pb-2">
-            <span className="font-medium text-base-content">Last Updated:</span>
-            <span className="text-base-content">
+
+          <div className="flex flex-col gap-1">
+            <span className="text-sm text-gray-500">Last Updated</span>
+            <span className="text-gray-800 font-medium">
               {new Date(user.updatedAt).toLocaleDateString()}
             </span>
           </div>
-          {/* Add more user data fields as needed */}
         </div>
 
-        <div className="mt-8 text-center">
-          {/* Add buttons for editing profile, changing password, etc. */}
+        {/* Action Button */}
+        <div className="mt-12 flex justify-end">
           <button
             onClick={() => navigate("/profile/edit")}
-            className="px-6 py-3 rounded-xl font-semibold 
-             bg-gradient-to-r from-primary to-secondary 
-             text-white shadow-lg 
-             hover:shadow-xl hover:scale-105 
-             transition-all duration-300"
+            className="px-7 py-3 rounded-xl font-semibold
+                     bg-green-600 text-white
+                     shadow-sm hover:bg-green-700
+                     hover:shadow-md hover:scale-105
+                     transition-all duration-300"
           >
             Edit Profile
           </button>
