@@ -40,17 +40,18 @@ const ProfilePage = () => {
       navigate("/"); // Redirect to home or login page
       setShowDeleteModal(false); // Close modal only on success
     } catch (error) {
-      let errorMessage = "Failed to delete account. Please try again.";
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
+      let errorMessage = "Failed to delete account. Please check your balance or try again."; // More general fallback
+      // Attempt to extract a specific error message from the response
+      if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
+      } else if (error.message) { // Fallback to generic error.message
+        errorMessage = error.message;
       }
       setDeleteError(errorMessage); // Set error for display in modal
       toast.error(errorMessage); // Show toast notification for error
       console.error("Error deleting account:", error);
+      console.log("Full error object:", error); // Added for debugging
+      console.log("Error response object:", error.response); // Added for debugging
     } finally {
       setIsDeleting(false);
       // The modal will remain open if there's an error because setShowDeleteModal(false) is not called in catch
