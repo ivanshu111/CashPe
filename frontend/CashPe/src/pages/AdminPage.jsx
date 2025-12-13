@@ -298,6 +298,15 @@ const AdminPage = () => {
 
                           <button
                             onClick={() =>
+                              navigate(`/admin/users/${user._id}/transactions`)
+                            }
+                            className="btn btn-info text-white btn-sm rounded-full px-5 mr-2 shadow-md hover:shadow-lg transition-all duration-300"
+                          >
+                            Show Transactions
+                          </button>
+
+                          <button
+                            onClick={() =>
                               handleToggleUserStatus(user._id, user.status)
                             }
                             className={`btn btn-sm rounded-full px-5 text-white border-none shadow-md transition-all duration-300

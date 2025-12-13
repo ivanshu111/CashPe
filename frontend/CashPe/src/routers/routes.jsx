@@ -11,6 +11,7 @@ import ProfilePage from "../pages/ProfilePage.jsx";
 import EditProfilePage from "../pages/EditProfilePage.jsx"; // Import EditProfilePage
 import AdminPage from "../pages/AdminPage.jsx"; // Import AdminPage
 import ProtectedRoute from "../components/ProtectedRoute.jsx";
+import UserTransactionsPage from "../pages/UserTransactionsPage.jsx"; // Import the new page
 
 const router = createBrowserRouter([
   {
@@ -60,6 +61,10 @@ const router = createBrowserRouter([
           {
             path: "/admin",
             element: <AdminPage />,
+          },
+          {
+            path: "/admin/users/:userId/transactions", // New route for user transactions
+            element: <UserTransactionsPage />,
           },
         ],
       },

@@ -114,4 +114,32 @@ router.put("/users/:userId/status", adminController.updateUserStatus);
  */
 router.get("/users/:userId/details", adminController.getUserDetails);
 
+/**
+ * @swagger
+ * /api/admin/users/{userId}/transactions:
+ *   get:
+ *     summary: Get all transactions for a specific user
+ *     description: Retrieve a list of all transactions for a specific user. Accessible only by admin.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user to retrieve transactions for.
+ *     responses:
+ *       200:
+ *         description: A list of transactions for the user.
+ *       401:
+ *         description: Unauthorized.
+ *       403:
+ *         description: Forbidden, only admins can access.
+ *       404:
+ *         description: User not found.
+ */
+router.get("/users/:userId/transactions", adminController.getUserTransactions);
+
 module.exports = router;

@@ -82,3 +82,23 @@ exports.getUserDetails = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get all transactions for a specific user
+// @route   GET /api/admin/users/:userId/transactions
+// @access  Admin
+exports.getUserTransactions = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    const transactions = await Transaction.find({
+      $or: [{ fromUser: userId }, { toUser: userId }],
+    })
+      .populate("fromUser", "name email")
+      .populate("toUser", "name email")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ transactions });
+  } catch (error) {
+    next(error);
+  }
+};

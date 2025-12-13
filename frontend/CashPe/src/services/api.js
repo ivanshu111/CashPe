@@ -169,3 +169,12 @@ export const deleteUserAccount = async () => {
   }
 };
 
+export const getUserTransactions = async (userId) => {
+  try {
+    const response = await api.get(`/admin/users/${userId}/transactions`);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
