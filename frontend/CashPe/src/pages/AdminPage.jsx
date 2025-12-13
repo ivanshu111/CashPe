@@ -196,13 +196,13 @@ const AdminPage = () => {
                         </td>
                         <td>
                           <button
-                            className="btn btn-sm btn-info mr-2"
+                            className="btn btn-info mr-2"
                             onClick={() => handleViewUserDetails(user._id)}
                           >
                             Details
                           </button>
                           <button
-                            className={`btn btn-sm ${
+                            className={`btn ${
                               user.status === "active"
                                 ? "btn-warning"
                                 : "btn-success"
