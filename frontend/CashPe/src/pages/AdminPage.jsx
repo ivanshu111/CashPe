@@ -218,45 +218,47 @@ const AdminPage = () => {
             <h2 className="text-3xl font-semibold mb-6">User Management</h2>
 
             {/* Search Bar */}
-            <div className="mb-6 p-4 bg-base-200 rounded-lg shadow-inner flex flex-col md:flex-row items-center gap-4">
+            <div className="mb-6 p-5 bg-base-100 rounded-2xl shadow-lg flex flex-col md:flex-row items-center gap-3 border border-base-300">
               <input
                 type="text"
                 placeholder="Search by name or email..."
-                className="input input-bordered w-full md:flex-grow"
+                className="input w-full md:flex-grow rounded-full bg-base-200 focus:bg-base-100 focus:ring-2 focus:ring-green-500 transition-all"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSearch(e);
-                  }
+                  if (e.key === "Enter") handleSearch(e);
                 }}
               />
+
               <button
-                className="btn btn-primary w-full md:w-auto"
+                className="btn rounded-full px-8 bg-green-600 hover:bg-green-700 text-white border-none shadow-md transition-all"
                 onClick={handleSearch}
                 disabled={isSearching}
               >
                 {isSearching ? "Searching..." : "Search"}
               </button>
+
               {searchedUsers !== null && (
                 <button
-                  className="btn btn-ghost w-full md:w-auto"
+                  className="btn btn-ghost rounded-full px-6 hover:bg-base-200 transition-all"
                   onClick={handleClearSearch}
                   disabled={isSearching}
                 >
-                  Clear Search
+                  Clear
                 </button>
               )}
             </div>
+
             {searchError && <p className="text-error mb-4">{searchError}</p>}
 
             {loadingUsers && <p>Loading users...</p>}
-            {!loadingUsers && displayUsers.length === 0 && searchedUsers === null && (
-              <p>No users found.</p>
-            )}
-            {!loadingUsers && displayUsers.length === 0 && searchedUsers !== null && !isSearching && (
-              <p>No users found for your search query.</p>
-            )}
+            {!loadingUsers &&
+              displayUsers.length === 0 &&
+              searchedUsers === null && <p>No users found.</p>}
+            {!loadingUsers &&
+              displayUsers.length === 0 &&
+              searchedUsers !== null &&
+              !isSearching && <p>No users found for your search query.</p>}
             {!loadingUsers && displayUsers.length > 0 && (
               <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-md">
                 <table className="table w-full min-w-max">
@@ -390,53 +392,87 @@ const AdminPage = () => {
 
         {/* User Details Modal */}
         {showUserDetailsModal && selectedUser && (
-          <div className="modal modal-open">
-            <div className="modal-box relative">
+          <div className="modal modal-open backdrop-blur-sm">
+            <div className="modal-box relative max-w-md rounded-2xl shadow-2xl p-6 bg-base-100">
+              {/* Close button */}
               <button
-                className="btn btn-sm btn-circle absolute right-2 top-2"
+                className="btn btn-sm btn-circle absolute right-4 top-4 bg-base-200 hover:bg-base-300"
                 onClick={() => setShowUserDetailsModal(false)}
               >
                 ✕
               </button>
-              <h3 className="font-bold text-lg">User Details</h3>
-              <p>
-                <strong>Name:</strong> {selectedUser.name}
-              </p>
-              <p>
-                <strong>Email:</strong> {selectedUser.email}
-              </p>
-              <p>
-                <strong>Phone:</strong> {selectedUser.phone}
-              </p>
-              <p>
-                <strong>Role:</strong> {selectedUser.role}
-              </p>
-              <p>
-                <strong>Status:</strong> {selectedUser.status}
-              </p>
-              {selectedUser.wallet && (
-                <p>
-                  <strong>Wallet Balance:</strong> ₹
-                  {selectedUser.wallet.balance?.toFixed(2)}
-                </p>
-              )}
+
+              {/* Header */}
+              <h3 className="font-extrabold text-2xl mb-6 text-center">
+                User Details
+              </h3>
+
+              {/* Profile Picture */}
               {selectedUser.profilePicture && (
-                <div className="mt-4">
-                  <strong>Profile Picture:</strong>
+                <div className="flex justify-center mb-6">
                   <img
                     src={`http://localhost:3000${selectedUser.profilePicture.replace(
                       "/public",
                       ""
                     )}`}
                     alt="Profile"
-                    className="w-24 h-24 rounded-full object-cover mt-2"
+                    className="w-28 h-28 rounded-full object-cover border-4 border-green-500 shadow-lg"
                     crossOrigin="anonymous"
                   />
                 </div>
               )}
-              <div className="modal-action">
+
+              {/* User Info */}
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-gray-500">Name</span>
+                  <span className="font-semibold">{selectedUser.name}</span>
+                </div>
+
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-gray-500">Email</span>
+                  <span className="font-semibold">{selectedUser.email}</span>
+                </div>
+
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-gray-500">Phone</span>
+                  <span className="font-semibold">{selectedUser.phone}</span>
+                </div>
+
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-gray-500">Role</span>
+                  <span className="badge badge-info badge-outline">
+                    {selectedUser.role}
+                  </span>
+                </div>
+
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-gray-500">Status</span>
+                  <span
+                    className={`badge ${
+                      selectedUser.status === "active"
+                        ? "badge-success"
+                        : "badge-error"
+                    }`}
+                  >
+                    {selectedUser.status}
+                  </span>
+                </div>
+
+                {selectedUser.wallet && (
+                  <div className="flex justify-between pt-2">
+                    <span className="text-gray-500">Wallet Balance</span>
+                    <span className="font-bold text-green-600">
+                      ₹ {selectedUser.wallet.balance?.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Action */}
+              <div className="modal-action mt-6 justify-center">
                 <button
-                  className="btn"
+                  className="btn px-10 rounded-full bg-green-600 hover:bg-green-700 text-white border-none"
                   onClick={() => setShowUserDetailsModal(false)}
                 >
                   Close
