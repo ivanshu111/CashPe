@@ -71,7 +71,7 @@ export const addMoney = async (amount) => {
   }
 };
 
-export const findUserByPhoneOrEmail = async (query) => {
+export const searchUsers = async (query) => {
   try {
     const response = await api.get("/users/find", { params: query });
     return response.data;

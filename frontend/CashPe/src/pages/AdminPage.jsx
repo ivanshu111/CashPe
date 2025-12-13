@@ -4,6 +4,7 @@ import {
   getAllTransactions,
   updateUserStatus,
   getUserDetails,
+  searchUsers, // Import searchUsers
 } from "../services/api";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +19,12 @@ const AdminPage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
   const [activeTab, setActiveTab] = useState("users"); // 'users' or 'transactions'
+
+  // Search states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchedUsers, setSearchedUsers] = useState(null); // null means no search performed yet
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState(null);
 
   // Pagination states
   const [userCurrentPage, setUserCurrentPage] = useState(1);
@@ -63,11 +70,54 @@ const AdminPage = () => {
     fetchAdminData();
   }, [currentUser, navigate]);
 
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) {
+      setSearchedUsers(null); // Clear search results if query is empty
+      setSearchError(null);
+      return;
+    }
+
+    setIsSearching(true);
+    setSearchError(null);
+    try {
+      // Determine if the search query is likely an email or a name
+      // Simple regex for email validation
+      const isEmail = /\S+@\S+\.\S+/.test(searchQuery);
+      let query = {};
+      if (isEmail) {
+        query = { email: searchQuery };
+      } else {
+        query = { name: searchQuery };
+      }
+
+      const response = await searchUsers(query);
+      setSearchedUsers(response.users);
+      setUserCurrentPage(1); // Reset pagination for search results
+    } catch (err) {
+      setSearchError(err.message || "Failed to search users.");
+      setSearchedUsers([]); // Clear previous search results on error
+      console.error("Error searching users:", err);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setSearchedUsers(null);
+    setSearchError(null);
+    setUserCurrentPage(1); // Reset pagination
+  };
+
+  // Determine which list of users to display
+  const displayUsers = searchedUsers !== null ? searchedUsers : users;
+
   // User Pagination Logic
   const indexOfLastUser = userCurrentPage * itemsPerPage;
   const indexOfFirstUser = indexOfLastUser - itemsPerPage;
-  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
-  const totalUserPages = Math.ceil(users.length / itemsPerPage);
+  const currentUsers = displayUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const totalUserPages = Math.ceil(displayUsers.length / itemsPerPage);
 
   // Transaction Pagination Logic
   const indexOfLastTransaction = transactionCurrentPage * itemsPerPage;
@@ -141,7 +191,9 @@ const AdminPage = () => {
           <a
             role="tab"
             className={`tab ${
-              activeTab === "users" ? "tab-active bg-primary text-primary-content" : "bg-base-200 text-base-content hover:bg-base-300"
+              activeTab === "users"
+                ? "tab-active bg-primary text-primary-content"
+                : "bg-base-200 text-base-content hover:bg-base-300"
             }`}
             onClick={() => setActiveTab("users")}
           >
@@ -150,7 +202,9 @@ const AdminPage = () => {
           <a
             role="tab"
             className={`tab ${
-              activeTab === "transactions" ? "tab-active bg-primary text-primary-content" : "bg-base-200 text-base-content hover:bg-base-300"
+              activeTab === "transactions"
+                ? "tab-active bg-primary text-primary-content"
+                : "bg-base-200 text-base-content hover:bg-base-300"
             }`}
             onClick={() => setActiveTab("transactions")}
           >
@@ -162,10 +216,48 @@ const AdminPage = () => {
         {activeTab === "users" && (
           <section className="mb-12">
             <h2 className="text-3xl font-semibold mb-6">User Management</h2>
+
+            {/* Search Bar */}
+            <div className="mb-6 p-4 bg-base-200 rounded-lg shadow-inner flex flex-col md:flex-row items-center gap-4">
+              <input
+                type="text"
+                placeholder="Search by name or email..."
+                className="input input-bordered w-full md:flex-grow"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch(e);
+                  }
+                }}
+              />
+              <button
+                className="btn btn-primary w-full md:w-auto"
+                onClick={handleSearch}
+                disabled={isSearching}
+              >
+                {isSearching ? "Searching..." : "Search"}
+              </button>
+              {searchedUsers !== null && (
+                <button
+                  className="btn btn-ghost w-full md:w-auto"
+                  onClick={handleClearSearch}
+                  disabled={isSearching}
+                >
+                  Clear Search
+                </button>
+              )}
+            </div>
+            {searchError && <p className="text-error mb-4">{searchError}</p>}
+
             {loadingUsers && <p>Loading users...</p>}
-            {errorUsers && <p className="text-error">{errorUsers}</p>}
-            {!loadingUsers && users.length === 0 && <p>No users found.</p>}
-            {!loadingUsers && users.length > 0 && (
+            {!loadingUsers && displayUsers.length === 0 && searchedUsers === null && (
+              <p>No users found.</p>
+            )}
+            {!loadingUsers && displayUsers.length === 0 && searchedUsers !== null && !isSearching && (
+              <p>No users found for your search query.</p>
+            )}
+            {!loadingUsers && displayUsers.length > 0 && (
               <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-md">
                 <table className="table w-full min-w-max">
                   <thead>
@@ -196,22 +288,27 @@ const AdminPage = () => {
                         </td>
                         <td>
                           <button
-                            className="btn btn-info mr-2"
                             onClick={() => handleViewUserDetails(user._id)}
+                            className="btn bg-indigo-600 text-white btn-sm rounded-full px-5 mr-2 shadow-md hover:shadow-lg transition-all duration-300"
                           >
-                            Details
+                            View Details
                           </button>
+
                           <button
-                            className={`btn ${
-                              user.status === "active"
-                                ? "btn-warning"
-                                : "btn-success"
-                            }`}
                             onClick={() =>
                               handleToggleUserStatus(user._id, user.status)
                             }
+                            className={`btn btn-sm rounded-full px-5 text-white border-none shadow-md transition-all duration-300
+    ${
+      user.status === "active"
+        ? "bg-red-600 hover:bg-red-700"
+        : "bg-green-600 hover:bg-green-700"
+    }
+  `}
                           >
-                            {user.status === "active" ? "Deactivate" : "Activate"}
+                            {user.status === "active"
+                              ? "Deactivate"
+                              : "Activate"}
                           </button>
                         </td>
                       </tr>

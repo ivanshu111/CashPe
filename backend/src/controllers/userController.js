@@ -3,19 +3,19 @@ const Wallet = require("../models/Wallet"); // Import Wallet model
 
 const findUsers = async (req, res, next) => {
   try {
-    const { email, phone } = req.query;
-    if (!email && !phone) {
+    const { email, name } = req.query; // Added 'name'
+    if (!email && !name) { // Updated condition
       return res
         .status(400)
-        .json({ message: "Please provide an email or phone number to search" });
+        .json({ message: "Please provide an email or name to search" }); // Updated message
     }
 
     let query = {};
     if (email) {
-      query.email = email;
+      query.email = { $regex: email, $options: "i" }; // Case-insensitive search for email
     }
-    if (phone) {
-      query.phone = phone;
+    if (name) {
+      query.name = { $regex: name, $options: "i" }; // Case-insensitive search for name
     }
 
     const users = await User.find(query).select("-password -pin"); // Exclude sensitive info

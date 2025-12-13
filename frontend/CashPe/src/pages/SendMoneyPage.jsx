@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { sendMoney, findUserByPhoneOrEmail } from "../services/api"; // Import API functions
+import { sendMoney, searchUsers } from "../services/api"; // Import API functions
 import {
   CurrencyRupeeIcon,
   UserCircleIcon,
@@ -33,10 +33,12 @@ const SendMoneyPage = () => {
       setSearchLoading(true);
       setError(null);
       try {
-        // Determine if query is email or phone number
-        const isEmail = query.includes("@");
-        const searchParam = isEmail ? { email: query } : { phone: query };
-        const response = await findUserByPhoneOrEmail(searchParam);
+        // Determine if query is email or name
+        // Simple regex for email validation
+        const isEmail = /\S+@\S+\.\S+/.test(query);
+        const searchParam = isEmail ? { email: query } : { name: query }; // Changed to search by name
+
+        const response = await searchUsers(searchParam);
         setSearchResults(response.users || []); // Assuming response has a 'users' array
       } catch (err) {
         let errorMessage = "Failed to search for users.";
@@ -177,7 +179,7 @@ const SendMoneyPage = () => {
             <div className="relative mb-4">
               <input
                 type="text"
-                placeholder="Enter email or phone number"
+                placeholder="Enter email or name"
                 className="w-full border border-gray-300 rounded-xl p-4 pr-12 text-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
