@@ -132,221 +132,223 @@ const AdminPage = () => {
   );
 
   return (
-    <div className="p-8 bg-base-100 min-h-screen">
-      <h1 className="text-4xl font-bold mb-8 text-center">Admin Dashboard</h1>
+    <div className="bg-base-100 min-h-screen">
+      <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-4xl font-bold mb-8 text-center">Admin Dashboard</h1>
 
-      {/* Tab Navigation */}
-      <div role="tablist" className="tabs tabs-boxed mb-8 w-full">
-        <a
-          role="tab"
-          className={`tab ${
-            activeTab === "users" ? "tab-active bg-primary text-primary-content" : "bg-base-200 text-base-content hover:bg-base-300"
-          }`}
-          onClick={() => setActiveTab("users")}
-        >
-          User Management
-        </a>
-        <a
-          role="tab"
-          className={`tab ${
-            activeTab === "transactions" ? "tab-active bg-primary text-primary-content" : "bg-base-200 text-base-content hover:bg-base-300"
-          }`}
-          onClick={() => setActiveTab("transactions")}
-        >
-          Transaction Management
-        </a>
-      </div>
-
-      {/* User Management Section */}
-      {activeTab === "users" && (
-        <section className="mb-12">
-          <h2 className="text-3xl font-semibold mb-6">User Management</h2>
-          {loadingUsers && <p>Loading users...</p>}
-          {errorUsers && <p className="text-error">{errorUsers}</p>}
-          {!loadingUsers && users.length === 0 && <p>No users found.</p>}
-          {!loadingUsers && users.length > 0 && (
-            <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-md">
-              <table className="table w-full min-w-max">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentUsers.map((user) => (
-                    <tr key={user._id}>
-                      <td>{user.name}</td>
-                      <td>{user.email}</td>
-                      <td>{user.role}</td>
-                      <td>
-                        <span
-                          className={`badge ${
-                            user.status === "active"
-                              ? "badge-success"
-                              : "badge-error"
-                          }`}
-                        >
-                          {user.status}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-info mr-2"
-                          onClick={() => handleViewUserDetails(user._id)}
-                        >
-                          Details
-                        </button>
-                        <button
-                          className={`btn btn-sm ${
-                            user.status === "active"
-                              ? "btn-warning"
-                              : "btn-success"
-                          }`}
-                          onClick={() =>
-                            handleToggleUserStatus(user._id, user.status)
-                          }
-                        >
-                          {user.status === "active" ? "Deactivate" : "Activate"}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <PaginationControls
-                currentPage={userCurrentPage}
-                totalPages={totalUserPages}
-                onPageChange={setUserCurrentPage}
-              />
-            </div>
-          )}
-        </section>
-      )}
-
-      {/* Transaction Management Section */}
-      {activeTab === "transactions" && (
-        <section>
-          <h2 className="text-3xl font-semibold mb-6">
+        {/* Tab Navigation */}
+        <div role="tablist" className="tabs tabs-boxed mb-8 w-full">
+          <a
+            role="tab"
+            className={`tab ${
+              activeTab === "users" ? "tab-active bg-primary text-primary-content" : "bg-base-200 text-base-content hover:bg-base-300"
+            }`}
+            onClick={() => setActiveTab("users")}
+          >
+            User Management
+          </a>
+          <a
+            role="tab"
+            className={`tab ${
+              activeTab === "transactions" ? "tab-active bg-primary text-primary-content" : "bg-base-200 text-base-content hover:bg-base-300"
+            }`}
+            onClick={() => setActiveTab("transactions")}
+          >
             Transaction Management
-          </h2>
-          {loadingTransactions && <p>Loading transactions...</p>}
-          {errorTransactions && (
-            <p className="text-error">{errorTransactions}</p>
-          )}
-          {!loadingTransactions && transactions.length === 0 && (
-            <p>No transactions found.</p>
-          )}
-          {!loadingTransactions && transactions.length > 0 && (
-            <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-md">
-              <table className="table w-full min-w-max">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Amount</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentTransactions.map((transaction) => (
-                    <tr key={transaction._id}>
-                      <td>{transaction._id}</td>
-                      <td>{transaction.fromUser?.name || "N/A"}</td>
-                      <td>{transaction.toUser?.name || "N/A"}</td>
-                      <td>₹{transaction.amount?.toFixed(2)}</td>
-                      <td>{transaction.type}</td>
-                      <td>
-                        <span
-                          className={`badge ${
-                            transaction.status === "completed"
-                              ? "badge-success"
-                              : "badge-error"
-                          }`}
-                        >
-                          {transaction.status}
-                        </span>
-                      </td>
-                      <td>
-                        {new Date(transaction.createdAt).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <PaginationControls
-                currentPage={transactionCurrentPage}
-                totalPages={totalTransactionPages}
-                onPageChange={setTransactionCurrentPage}
-              />
-            </div>
-          )}
-        </section>
-      )}
+          </a>
+        </div>
 
-      {/* User Details Modal */}
-      {showUserDetailsModal && selectedUser && (
-        <div className="modal modal-open">
-          <div className="modal-box relative">
-            <button
-              className="btn btn-sm btn-circle absolute right-2 top-2"
-              onClick={() => setShowUserDetailsModal(false)}
-            >
-              ✕
-            </button>
-            <h3 className="font-bold text-lg">User Details</h3>
-            <p>
-              <strong>Name:</strong> {selectedUser.name}
-            </p>
-            <p>
-              <strong>Email:</strong> {selectedUser.email}
-            </p>
-            <p>
-              <strong>Phone:</strong> {selectedUser.phone}
-            </p>
-            <p>
-              <strong>Role:</strong> {selectedUser.role}
-            </p>
-            <p>
-              <strong>Status:</strong> {selectedUser.status}
-            </p>
-            {selectedUser.wallet && (
-              <p>
-                <strong>Wallet Balance:</strong> ₹
-                {selectedUser.wallet.balance?.toFixed(2)}
-              </p>
-            )}
-            {selectedUser.profilePicture && (
-              <div className="mt-4">
-                <strong>Profile Picture:</strong>
-                <img
-                  src={`http://localhost:3000${selectedUser.profilePicture.replace(
-                    "/public",
-                    ""
-                  )}`}
-                  alt="Profile"
-                  className="w-24 h-24 rounded-full object-cover mt-2"
-                  crossOrigin="anonymous"
+        {/* User Management Section */}
+        {activeTab === "users" && (
+          <section className="mb-12">
+            <h2 className="text-3xl font-semibold mb-6">User Management</h2>
+            {loadingUsers && <p>Loading users...</p>}
+            {errorUsers && <p className="text-error">{errorUsers}</p>}
+            {!loadingUsers && users.length === 0 && <p>No users found.</p>}
+            {!loadingUsers && users.length > 0 && (
+              <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-md">
+                <table className="table w-full min-w-max">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentUsers.map((user) => (
+                      <tr key={user._id}>
+                        <td>{user.name}</td>
+                        <td>{user.email}</td>
+                        <td>{user.role}</td>
+                        <td>
+                          <span
+                            className={`badge ${
+                              user.status === "active"
+                                ? "badge-success"
+                                : "badge-error"
+                            }`}
+                          >
+                            {user.status}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-sm btn-info mr-2"
+                            onClick={() => handleViewUserDetails(user._id)}
+                          >
+                            Details
+                          </button>
+                          <button
+                            className={`btn btn-sm ${
+                              user.status === "active"
+                                ? "btn-warning"
+                                : "btn-success"
+                            }`}
+                            onClick={() =>
+                              handleToggleUserStatus(user._id, user.status)
+                            }
+                          >
+                            {user.status === "active" ? "Deactivate" : "Activate"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <PaginationControls
+                  currentPage={userCurrentPage}
+                  totalPages={totalUserPages}
+                  onPageChange={setUserCurrentPage}
                 />
               </div>
             )}
-            <div className="modal-action">
+          </section>
+        )}
+
+        {/* Transaction Management Section */}
+        {activeTab === "transactions" && (
+          <section>
+            <h2 className="text-3xl font-semibold mb-6">
+              Transaction Management
+            </h2>
+            {loadingTransactions && <p>Loading transactions...</p>}
+            {errorTransactions && (
+              <p className="text-error">{errorTransactions}</p>
+            )}
+            {!loadingTransactions && transactions.length === 0 && (
+              <p>No transactions found.</p>
+            )}
+            {!loadingTransactions && transactions.length > 0 && (
+              <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-md">
+                <table className="table w-full min-w-max">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>From</th>
+                      <th>To</th>
+                      <th>Amount</th>
+                      <th>Type</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentTransactions.map((transaction) => (
+                      <tr key={transaction._id}>
+                        <td>{transaction._id}</td>
+                        <td>{transaction.fromUser?.name || "N/A"}</td>
+                        <td>{transaction.toUser?.name || "N/A"}</td>
+                        <td>₹{transaction.amount?.toFixed(2)}</td>
+                        <td>{transaction.type}</td>
+                        <td>
+                          <span
+                            className={`badge ${
+                              transaction.status === "completed"
+                                ? "badge-success"
+                                : "badge-error"
+                            }`}
+                          >
+                            {transaction.status}
+                          </span>
+                        </td>
+                        <td>
+                          {new Date(transaction.createdAt).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <PaginationControls
+                  currentPage={transactionCurrentPage}
+                  totalPages={totalTransactionPages}
+                  onPageChange={setTransactionCurrentPage}
+                />
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* User Details Modal */}
+        {showUserDetailsModal && selectedUser && (
+          <div className="modal modal-open">
+            <div className="modal-box relative">
               <button
-                className="btn"
+                className="btn btn-sm btn-circle absolute right-2 top-2"
                 onClick={() => setShowUserDetailsModal(false)}
               >
-                Close
+                ✕
               </button>
+              <h3 className="font-bold text-lg">User Details</h3>
+              <p>
+                <strong>Name:</strong> {selectedUser.name}
+              </p>
+              <p>
+                <strong>Email:</strong> {selectedUser.email}
+              </p>
+              <p>
+                <strong>Phone:</strong> {selectedUser.phone}
+              </p>
+              <p>
+                <strong>Role:</strong> {selectedUser.role}
+              </p>
+              <p>
+                <strong>Status:</strong> {selectedUser.status}
+              </p>
+              {selectedUser.wallet && (
+                <p>
+                  <strong>Wallet Balance:</strong> ₹
+                  {selectedUser.wallet.balance?.toFixed(2)}
+                </p>
+              )}
+              {selectedUser.profilePicture && (
+                <div className="mt-4">
+                  <strong>Profile Picture:</strong>
+                  <img
+                    src={`http://localhost:3000${selectedUser.profilePicture.replace(
+                      "/public",
+                      ""
+                    )}`}
+                    alt="Profile"
+                    className="w-24 h-24 rounded-full object-cover mt-2"
+                    crossOrigin="anonymous"
+                  />
+                </div>
+              )}
+              <div className="modal-action">
+                <button
+                  className="btn"
+                  onClick={() => setShowUserDetailsModal(false)}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
