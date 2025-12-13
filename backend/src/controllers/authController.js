@@ -168,7 +168,10 @@ const getTransactionHistory = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const transactions = await Transaction.find({
-      $or: [{ fromUser: userId }, { toUser: userId }],
+      $or: [
+        { fromUser: userId, type: "debit" }, // Show debit if current user is sender
+        { toUser: userId, type: "credit" }, // Show credit if current user is receiver
+      ],
     })
       .sort({ createdAt: -1 })
       .populate("fromUser", "name email")
