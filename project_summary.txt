@@ -1,0 +1,106 @@
+Project Title: CashPe - Digital Wallet Application
+
+Project Overview:
+CashPe is a modern digital wallet application designed to simplify money management. It allows users to securely register, log in, manage their profiles, add and send money, and view their transaction history. For administrators, it provides robust tools to manage users and monitor all financial transactions across the system. The application prioritizes security, user experience, and real-time responsiveness.
+
+Key Features:
+
+User Authentication & Authorization:
+    Secure user registration and login processes.
+    Comprehensive profile management, including editing personal details and uploading profile pictures.
+    PIN-based security for sensitive transactions to ensure user control and safety.
+    Role-based access control, differentiating between standard users and administrators.
+    Global handling for session expiration and unauthorized access, ensuring users are automatically logged out and redirected for security.
+
+Wallet Management:
+    Users can easily view their current wallet balance.
+    Functionality to add funds to their digital wallet.
+    Securely send money to other registered users, with a convenient search feature to find recipients by email or name.
+
+Transaction Management:
+    Users can view their personal transaction history, distinguishing between credit and debit entries.
+    Admin Features (Accessible only by administrators):
+        Ability to view a comprehensive list of all registered users and their detailed profiles.
+        Search users efficiently by their name or email address.
+        Control user account status (activate or deactivate) as needed.
+        Access to a list of all system-wide financial transactions.
+        Dedicated view to see all transactions associated with a particular user.
+        Advanced sorting capabilities for transactions by amount or date, in both ascending and descending order, to facilitate analysis.
+
+Notifications:
+    Real-time notifications powered by WebSockets for instant updates on transactions and other important activities.
+
+Account Deletion:
+    A secure and confirmed process for users to delete their accounts, with a critical check for outstanding wallet balances before deletion to prevent data loss.
+
+Profile Picture Upload:
+    Users have the ability to upload and manage their profile pictures, enhancing personalization.
+
+Tech Stack Used:
+
+Frontend:
+    React: A robust JavaScript library for building dynamic and responsive user interfaces.
+    Redux Toolkit: Provides efficient and scalable state management for the entire application.
+    React Router DOM: Manages navigation and routing within the single-page application.
+    Axios: A promise-based HTTP client used for making API requests to the backend.
+    Tailwind CSS: A utility-first CSS framework for rapid and consistent styling.
+    DaisyUI: A Tailwind CSS component library offering pre-designed, customizable UI components.
+    React Hot Toast: For delivering elegant and user-friendly toast notifications and alerts.
+    lodash (debounce): Utilized for optimizing performance, especially in search inputs, by delaying function execution.
+    Vite: A next-generation frontend tool that provides extremely fast development server startup and build times.
+
+Backend:
+    Node.js: A powerful JavaScript runtime environment used for building scalable server-side applications.
+    Express.js: A minimalist and flexible Node.js web application framework, forming the backbone of the API server.
+    MongoDB (with Mongoose): A NoSQL database used for flexible and scalable data storage. Mongoose acts as an Object Data Modeling (ODM) library, simplifying interactions with MongoDB.
+    JWT (JSON Web Tokens): Implemented for secure, stateless user authentication and authorization.
+    Bcrypt.js: A library used for hashing passwords and PINs, ensuring secure storage of sensitive user credentials.
+    Multer: An Express.js middleware for handling multipart/form-data, primarily used for file uploads (e.g., profile pictures).
+    Redis (via redisManager, socketManager): Utilized for real-time functionalities, particularly for handling notifications through a pub/sub messaging pattern.
+    Swagger/Swagger UI Express: Provides automated API documentation, making it easy to understand and test API endpoints.
+    Helmet: Enhances API security by setting various HTTP headers to mitigate common web vulnerabilities.
+    CORS: An Express.js middleware to enable Cross-Origin Resource Sharing, allowing frontend and backend to communicate across different origins.
+    Express Rate Limit: Protects API endpoints from abuse by limiting the number of requests a user can make within a specified timeframe.
+    Express Validator: Middleware used for server-side input validation, ensuring data integrity and security.
+
+Project Structure Highlights:
+
+frontend/CashPe/: The root directory for the React application.
+    src/components/: Houses reusable UI components like buttons, modals, and navigation elements.
+    src/pages/: Contains the main views or pages of the application (e.g., LoginPage, ProfilePage, AdminPage).
+    src/services/api.js: Centralized module for all frontend API calls, configured with Axios interceptors for token handling and error management.
+    src/slice/authSlice.js: A Redux Toolkit slice managing authentication-related state, including user data and tokens.
+    src/utils/dateUtils.js: Utility functions, such as `formatDate`, for consistent and safe date rendering.
+    src/routers/routes.jsx: Defines all frontend routes and their corresponding components, including protected routes.
+backend/: The root directory for the Node.js/Express.js API server.
+    src/config/db.js: Manages the connection to the MongoDB database.
+    src/controllers/: Contains the business logic and request handlers for different API endpoints.
+    src/middlewares/: Custom Express middleware for authentication (`auth.js`), authorization (`adminAuth.js`), and file uploads (`upload.js`).
+    src/models/: Defines Mongoose schemas for the MongoDB collections (e.g., User, Wallet, Transaction).
+    src/routes/: Defines all backend API routes (e.g., authRoutes, walletRoutes, adminRoutes).
+    src/service/: Houses service-specific logic, such as `socketManager.js` for WebSockets and `redisManager.js` for Redis interactions.
+    src/utils/: Contains utility functions like `jwt.js` for token generation and `hash.js` for password hashing.
+    public/uploads/profile-pictures/: A directory to store uploaded user profile pictures.
+
+How to Run the Project (General Steps):
+
+1.  Clone the Repository: First, clone the entire project repository to your local machine.
+2.  Backend Setup:
+        Navigate to the backend/ directory in your terminal.
+        Install dependencies: Run npm install to install all required Node.js packages.
+        Environment Configuration: Create a .env file in the backend/ directory. Refer to any provided .env.example (if available) for necessary variables like MONGODB_URI, JWT_SECRET, PORT, etc., and fill them with your respective values.
+        Start the Backend Server: Run npm start or nodemon app.js (if nodemon is installed) to start the API server. Ensure it's running on the configured port (default is 3000).
+3.  Frontend Setup:
+        Navigate to the frontend/CashPe/ directory in a separate terminal.
+        Install dependencies: Run npm install to install all required React and frontend packages.
+        Start the Frontend Development Server: Run npm run dev to start the React development server.
+4.  Access the Application: Open your web browser and navigate to the address provided by the Vite development server, usually http://localhost:5173.
+
+Important Notes:
+
+    Database: Ensure your MongoDB instance (local or remote) is running and accessible via the MONGODB_URI specified in your backend .env file.
+    Redis: For real-time notifications, a Redis server must be running and accessible.
+    Authentication: Always log in as an administrator first to access and test admin-specific features.
+    Token Management: The system automatically handles JWT tokens for authentication. If a token expires or is invalid, the frontend will automatically log out the user.
+    Password/PIN Hashing: All sensitive credentials are securely hashed.
+    API Documentation: Visit /api-docs on your backend server (e.g., http://localhost:3000/api-docs) to view the Swagger UI documentation for all API endpoints.
