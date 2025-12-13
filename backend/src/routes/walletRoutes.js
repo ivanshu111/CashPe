@@ -41,7 +41,7 @@ router.get("/balance", auth, verifyPin, getBalance);
  *       401:
  *         description: Unauthorized
  */
-router.get("/details", auth, verifyPin, getWalletDetails);
+router.get("/details", auth, getWalletDetails);
 
 /**
  * @swagger
@@ -106,4 +106,3 @@ router.post("/add-money", auth, addMoney);
 router.post("/send-money", auth, verifyPin, sendMoney); // Add sendMoney route
 
 module.exports = router;
-

@@ -79,12 +79,15 @@ export const findUserByPhoneOrEmail = async (query) => {
   }
 };
 
-export const sendMoney = async (toUserId, amount, pin) => {
+export const sendMoney = async (toUser, amount, pin) => {
   try {
-    const response = await api.post("/wallet/send-money", { toUserId, amount, pin });
+    const response = await api.post("/wallet/send-money", {
+      toUser,
+      amount,
+      pin,
+    });
     return response.data;
   } catch (error) {
     throw error.response.data;
   }
 };
-
