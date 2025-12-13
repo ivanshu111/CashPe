@@ -20,11 +20,13 @@ exports.getAllUsers = async (req, res, next) => {
 exports.getAllTransactions = async (req, res, next) => {
   try {
     const { sort_by, sort_order } = req.query;
+    console.log("getAllTransactions - Received sort_by:", sort_by, "sort_order:", sort_order);
     let sortCriteria = { createdAt: -1 }; // Default sort
 
     if (sort_by && (sort_by === "amount" || sort_by === "createdAt")) { // Only allow sorting by amount or createdAt
       sortCriteria = { [sort_by]: sort_order === "asc" ? 1 : -1 };
     }
+    console.log("getAllTransactions - Constructed sortCriteria:", sortCriteria);
 
     const transactions = await Transaction.find({})
       .populate("fromUser", "name email")
@@ -97,12 +99,14 @@ exports.getUserTransactions = async (req, res, next) => {
   try {
     const { userId } = req.params;
     const { sort_by, sort_order } = req.query; // Get sort parameters
+    console.log("getUserTransactions - Received sort_by:", sort_by, "sort_order:", sort_order);
 
     let sortCriteria = { createdAt: -1 }; // Default sort
 
     if (sort_by && (sort_by === "amount" || sort_by === "createdAt")) { // Only allow sorting by amount or createdAt
       sortCriteria = { [sort_by]: sort_order === "asc" ? 1 : -1 };
     }
+    console.log("getUserTransactions - Constructed sortCriteria:", sortCriteria);
 
     const transactions = await Transaction.find({
       $or: [{ fromUser: userId }, { toUser: userId }],
