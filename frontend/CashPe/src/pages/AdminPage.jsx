@@ -136,7 +136,7 @@ const AdminPage = () => {
       <h1 className="text-4xl font-bold mb-8 text-center">Admin Dashboard</h1>
 
       {/* Tab Navigation */}
-      <div role="tablist" className="tabs tabs-boxed mb-8 max-w-fit mx-auto">
+      <div role="tablist" className="tabs tabs-boxed mb-8 w-full">
         <a
           role="tab"
           className={`tab ${activeTab === "users" ? "tab-active" : ""}`}
@@ -162,7 +162,7 @@ const AdminPage = () => {
           {!loadingUsers && users.length === 0 && <p>No users found.</p>}
           {!loadingUsers && users.length > 0 && (
             <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-md">
-              <table className="table w-full">
+              <table className="table w-full min-w-max">
                 <thead>
                   <tr>
                     <th>Name</th>
@@ -238,7 +238,7 @@ const AdminPage = () => {
           )}
           {!loadingTransactions && transactions.length > 0 && (
             <div className="overflow-x-auto bg-white p-6 rounded-lg shadow-md">
-              <table className="table w-full">
+              <table className="table w-full min-w-max">
                 <thead>
                   <tr>
                     <th>ID</th>
