@@ -23,6 +23,7 @@ exports.getAllTransactions = async (req, res, next) => {
       .populate("fromUser", "name email")
       .populate("toUser", "name email")
       .sort({ createdAt: -1 });
+    console.log("Backend getAllTransactions length:", transactions.length); // Debug log
     res.status(200).json({ transactions });
   } catch (error) {
     next(error);
