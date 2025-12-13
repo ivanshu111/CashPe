@@ -1,7 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux"; // Import useSelector
 
 const HeroComponent = () => {
+  const { user } = useSelector((state) => state.auth); // Get user from Redux state
+
   return (
     <div className="hero min-h-screen bg-base-100">
       <div className="hero-content flex-col lg:flex-row-reverse">
@@ -18,11 +21,13 @@ const HeroComponent = () => {
             CashPe helps you track your spending, save money, and make seamless
             payments, all from one app.
           </p>
-          <Link to="/register">
-            <button className="btn btn-success bg-green-500 w-1/2 text-white btn-lg shadow-lg hover:scale-105 transition-all duration-300">
-              Get Started for Free
-            </button>
-          </Link>
+          {!user && ( // Conditionally render if no user is logged in
+            <Link to="/register">
+              <button className="btn btn-success bg-green-500 w-1/2 text-white btn-lg shadow-lg hover:scale-105 transition-all duration-300">
+                Get Started for Free
+              </button>
+            </Link>
+          )}
         </div>
       </div>
     </div>
