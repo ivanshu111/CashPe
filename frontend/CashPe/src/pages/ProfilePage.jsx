@@ -6,6 +6,7 @@ import { deleteUserAccount } from "../services/api";
 import { logout } from "../slice/authSlice";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal"; // Import the new modal
 import toast from "react-hot-toast"; // Import toast
+import formatDate from "../utils/dateUtils"; // Import formatDate
 
 const ProfilePage = () => {
   const { user } = useSelector((state) => state.auth);
@@ -111,14 +112,14 @@ const ProfilePage = () => {
           <div className="flex flex-col gap-1">
             <span className="text-sm text-gray-500">Account Created</span>
             <span className="text-gray-800 font-medium">
-              {new Date(user.createdAt).toLocaleDateString()}
+              {formatDate(user.createdAt)}
             </span>
           </div>
 
           <div className="flex flex-col gap-1">
             <span className="text-sm text-gray-500">Last Updated</span>
-            <span className="text-800 font-medium">
-              {new Date(user.updatedAt).toLocaleDateString()}
+            <span className="text-gray-800 font-medium">
+              {formatDate(user.updatedAt)}
             </span>
           </div>
         </div>
