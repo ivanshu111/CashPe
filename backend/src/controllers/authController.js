@@ -48,7 +48,7 @@ const registerUser = async (req, res, next) => {
       return res.status(400).json({ message: "Email already exists" });
     }
     
-    let profilePicturePath = req.file ? `/public/uploads/profile-pictures/${req.file.filename}` : undefined;
+    let profilePicturePath = req.file ? `/uploads/profile-pictures/${req.file.filename}` : undefined;
 
     const newUser = await User.create({
       name,
@@ -99,7 +99,7 @@ const loginUser = async (req, res, next) => {
       return res.status(400).json({ message: "Incorrect password" });
     }
     const token = generateToken({ userId: user._id });
-    res.status(200).json({ token, message: "User logged in successfully" });
+    res.status(200).json({ token, user });
   } catch (error) {
     next(error);
   }
@@ -145,7 +145,7 @@ const updateUserProfile = async (req, res, next) => {
           if (err) console.error('Error deleting old profile picture:', err);
         });
       }
-      user.profilePicture = `/public/uploads/profile-pictures/${req.file.filename}`;
+      user.profilePicture = `/uploads/profile-pictures/${req.file.filename}`;
     }
 
     await user.save();

@@ -1,14 +1,14 @@
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import {
-  Bars3Icon,
-  XMarkIcon,
-  BellIcon,
-  UserCircleIcon,
-} from "@heroicons/react/24/outline";
+import NotificationBell from "./NotificationBell";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../slice/authSlice";
 import { Fragment } from "react";
+import {
+  Bars3Icon,
+  XMarkIcon,
+  UserCircleIcon,
+} from "@heroicons/react/24/outline";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", current: true, protected: true },
@@ -22,6 +22,7 @@ function classNames(...classes) {
 export default function Navbar() {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const user = useSelector((state) => state.auth.user);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -30,7 +31,9 @@ export default function Navbar() {
     navigate("/login");
   };
 
-  const filteredNavigation = navigation.filter(item => !item.protected || isAuthenticated);
+  const filteredNavigation = navigation.filter(
+    (item) => !item.protected || isAuthenticated
+  );
 
   return (
     <Disclosure as="nav" className="bg-base-100 text-base-content">
@@ -81,14 +84,7 @@ export default function Navbar() {
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                 {isAuthenticated ? (
                   <>
-                    <button
-                      type="button"
-                      className="relative rounded-full bg-base-100 p-1 text-base-content hover:text-base-content focus:outline-none focus:ring-2 focus:ring-base-content focus:ring-offset-2 focus:ring-offset-base-100"
-                    >
-                      <span className="absolute -inset-1.5" />
-                      <span className="sr-only">View notifications</span>
-                      <BellIcon className="h-6 w-6" aria-hidden="true" />
-                    </button>
+                    <NotificationBell />
 
                     {/* Profile dropdown */}
                     <Menu as="div" className="relative ml-3">
@@ -96,11 +92,15 @@ export default function Navbar() {
                         <Menu.Button className="relative flex rounded-full bg-base-100 text-sm focus:outline-none focus:ring-2 focus:ring-base-content focus:ring-offset-2 focus:ring-offset-base-100">
                           <span className="absolute -inset-1.5" />
                           <span className="sr-only">Open user menu</span>
-                          {user && user.profileImage ? (
+                          {user && user.profilePicture ? (
                             <img
                               className="h-8 w-8 rounded-full"
-                              src={user.profileImage}
+                              src={`http://localhost:3000${user.profilePicture.replace(
+                                "/public",
+                                ""
+                              )}`}
                               alt="User Profile"
+                              crossOrigin="anonymous"
                             />
                           ) : (
                             <UserCircleIcon className="h-8 w-8 rounded-full text-base-content" />
