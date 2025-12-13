@@ -300,7 +300,7 @@ const AdminPage = () => {
                             onClick={() =>
                               navigate(`/admin/users/${user._id}/transactions`)
                             }
-                            className="btn btn-info text-white btn-sm rounded-full px-5 mr-2 shadow-md hover:shadow-lg transition-all duration-300"
+                            className="btn bg-blue-500 text-white btn-sm rounded-full px-5 mr-2 shadow-md hover:shadow-lg transition-all duration-300"
                           >
                             Show Transactions
                           </button>
