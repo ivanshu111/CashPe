@@ -19,10 +19,17 @@ exports.getAllUsers = async (req, res, next) => {
 // @access  Admin
 exports.getAllTransactions = async (req, res, next) => {
   try {
+    const { sort_by, sort_order } = req.query;
+    let sortCriteria = { createdAt: -1 }; // Default sort
+
+    if (sort_by && (sort_by === "amount" || sort_by === "createdAt")) { // Only allow sorting by amount or createdAt
+      sortCriteria = { [sort_by]: sort_order === "asc" ? 1 : -1 };
+    }
+
     const transactions = await Transaction.find({})
       .populate("fromUser", "name email")
       .populate("toUser", "name email")
-      .sort({ createdAt: -1 });
+      .sort(sortCriteria); // Apply dynamic sortCriteria
     res.status(200).json({ transactions });
   } catch (error) {
     next(error);
@@ -89,13 +96,20 @@ exports.getUserDetails = async (req, res, next) => {
 exports.getUserTransactions = async (req, res, next) => {
   try {
     const { userId } = req.params;
+    const { sort_by, sort_order } = req.query; // Get sort parameters
+
+    let sortCriteria = { createdAt: -1 }; // Default sort
+
+    if (sort_by && (sort_by === "amount" || sort_by === "createdAt")) { // Only allow sorting by amount or createdAt
+      sortCriteria = { [sort_by]: sort_order === "asc" ? 1 : -1 };
+    }
 
     const transactions = await Transaction.find({
       $or: [{ fromUser: userId }, { toUser: userId }],
     })
       .populate("fromUser", "name email")
       .populate("toUser", "name email")
-      .sort({ createdAt: -1 });
+      .sort(sortCriteria); // Apply dynamic sortCriteria
 
     res.status(200).json({ transactions });
   } catch (error) {

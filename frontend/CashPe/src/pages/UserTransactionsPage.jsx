@@ -14,6 +14,10 @@ const UserTransactionsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Sorting states
+  const [sortTransactionsBy, setSortTransactionsBy] = useState("createdAt");
+  const [sortTransactionsOrder, setSortTransactionsOrder] = useState("desc");
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; // Number of items per page
@@ -35,7 +39,11 @@ const UserTransactionsPage = () => {
         setUser(userDetailsData.user);
 
         // Fetch transactions for the user
-        const transactionsData = await getUserTransactions(userId);
+        const transactionsData = await getUserTransactions(
+          userId,
+          sortTransactionsBy,
+          sortTransactionsOrder
+        );
         setTransactions(transactionsData.transactions);
       } catch (err) {
         setError("Failed to fetch user transactions or details.");
@@ -48,7 +56,7 @@ const UserTransactionsPage = () => {
     if (userId) {
       fetchUserAndTransactions();
     }
-  }, [userId, currentUser, navigate]);
+  }, [userId, currentUser, navigate, sortTransactionsBy, sortTransactionsOrder]);
 
   // Pagination Logic
   const indexOfLastTransaction = currentPage * itemsPerPage;
@@ -95,6 +103,29 @@ const UserTransactionsPage = () => {
         <button onClick={() => navigate(-1)} className="btn btn-ghost mb-4">
           &laquo; Back to Admin Dashboard
         </button>
+
+        {/* Sorting Controls */}
+        <div className="mb-6 flex flex-wrap items-center gap-4">
+          <span className="font-medium text-lg">Sort by:</span>
+          <select
+            className="select select-bordered"
+            value={sortTransactionsBy}
+            onChange={(e) => setSortTransactionsBy(e.target.value)}
+          >
+            <option value="createdAt">Date</option>
+            <option value="amount">Amount</option>
+          </select>
+
+          <span className="font-medium text-lg">Order:</span>
+          <select
+            className="select select-bordered"
+            value={sortTransactionsOrder}
+            onChange={(e) => setSortTransactionsOrder(e.target.value)}
+          >
+            <option value="desc">Descending</option>
+            <option value="asc">Ascending</option>
+          </select>
+        </div>
 
         {loading && <p>Loading transactions...</p>}
         {error && <p className="text-error">{error}</p>}

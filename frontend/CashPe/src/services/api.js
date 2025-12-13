@@ -133,9 +133,11 @@ export const getAllUsers = async () => {
   }
 };
 
-export const getAllTransactions = async () => {
+export const getAllTransactions = async (sortBy = "createdAt", sortOrder = "desc") => {
   try {
-    const response = await api.get("/admin/transactions");
+    const response = await api.get("/admin/transactions", {
+      params: { sort_by: sortBy, sort_order: sortOrder },
+    });
     return response.data;
   } catch (error) {
     throw error.response.data;
@@ -169,9 +171,11 @@ export const deleteUserAccount = async () => {
   }
 };
 
-export const getUserTransactions = async (userId) => {
+export const getUserTransactions = async (userId, sortBy = "createdAt", sortOrder = "desc") => {
   try {
-    const response = await api.get(`/admin/users/${userId}/transactions`);
+    const response = await api.get(`/admin/users/${userId}/transactions`, {
+      params: { sort_by: sortBy, sort_order: sortOrder },
+    });
     return response.data;
   } catch (error) {
     throw error.response.data;

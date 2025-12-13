@@ -20,6 +20,10 @@ const AdminPage = () => {
   const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
   const [activeTab, setActiveTab] = useState("users"); // 'users' or 'transactions'
 
+  // Transactions Sorting states
+  const [sortTransactionsBy, setSortTransactionsBy] = useState("createdAt");
+  const [sortTransactionsOrder, setSortTransactionsOrder] = useState("desc");
+
   // Search states
   const [searchQuery, setSearchQuery] = useState("");
   const [searchedUsers, setSearchedUsers] = useState(null); // null means no search performed yet
@@ -57,7 +61,10 @@ const AdminPage = () => {
       // Fetch Transactions
       try {
         setLoadingTransactions(true);
-        const transactionsData = await getAllTransactions();
+        const transactionsData = await getAllTransactions(
+          sortTransactionsBy,
+          sortTransactionsOrder
+        );
         setTransactions(transactionsData.transactions);
       } catch (err) {
         setErrorTransactions("Failed to fetch transactions.");
@@ -68,7 +75,7 @@ const AdminPage = () => {
     };
 
     fetchAdminData();
-  }, [currentUser, navigate]);
+  }, [currentUser, navigate, sortTransactionsBy, sortTransactionsOrder]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -342,6 +349,30 @@ const AdminPage = () => {
             <h2 className="text-3xl font-semibold mb-6">
               Transaction Management
             </h2>
+
+            {/* Sorting Controls */}
+            <div className="mb-6 flex flex-wrap items-center gap-4">
+              <span className="font-medium text-lg">Sort by:</span>
+              <select
+                className="select select-bordered"
+                value={sortTransactionsBy}
+                onChange={(e) => setSortTransactionsBy(e.target.value)}
+              >
+                <option value="createdAt">Date</option>
+                <option value="amount">Amount</option>
+              </select>
+
+              <span className="font-medium text-lg">Order:</span>
+              <select
+                className="select select-bordered"
+                value={sortTransactionsOrder}
+                onChange={(e) => setSortTransactionsOrder(e.target.value)}
+              >
+                <option value="desc">Descending</option>
+                <option value="asc">Ascending</option>
+              </select>
+            </div>
+
             {loadingTransactions && <p>Loading transactions...</p>}
             {errorTransactions && (
               <p className="text-error">{errorTransactions}</p>
