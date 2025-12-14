@@ -6,8 +6,8 @@ import { loginSuccess } from "../slice/authSlice";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"; // Import icons
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("ivanshu@gmail.com");
-  const [password, setPassword] = useState("ivanshu@123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [showPassword, setShowPassword] = useState(false); // State for password visibility
 
@@ -25,7 +25,7 @@ const LoginPage = () => {
       const data = await login(email, password);
       dispatch(loginSuccess({ user: data.user, token: data.token }));
       // Set the default authorization header for axios after successful login
-      api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+      api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
       navigate("/dashboard");
     } catch (err) {
       setError(err.message);
@@ -37,16 +37,15 @@ const LoginPage = () => {
       <div className="card mx-auto w-full max-w-5xl  shadow-xl">
         <div className="grid  md:grid-cols-2 grid-cols-1">
           <div className="py-24 px-10">
-            <h2 className="text-2xl font-semibold mb-2 text-center">Login</h2>
+            <h2 className="text-2xl font-bold text-gray-600 mb-2 text-center">
+              Login
+            </h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <div className="form-control w-full">
-                  <label className="label">
-                    <span className="label-text">Email</span>
-                  </label>
                   <input
                     type="email"
-                    placeholder="email"
+                    placeholder="Email"
                     className="input input-bordered w-full"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -55,13 +54,10 @@ const LoginPage = () => {
               </div>
               <div className="mb-4">
                 <div className="form-control w-full">
-                  <label className="label">
-                    <span className="label-text">Password</span>
-                  </label>
                   <div className="relative w-full">
                     <input
                       type={showPassword ? "text" : "password"} // Toggle type
-                      placeholder="password"
+                      placeholder="Password"
                       className="input input-bordered w-full pr-10" // Add padding for icon
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -80,12 +76,7 @@ const LoginPage = () => {
                   </div>
                 </div>
               </div>
-              <Link
-                to="/forgot-password"
-                className="text-xs text-gray-600 hover:underline hover:text-blue-600"
-              >
-                Forgot password?
-              </Link>
+
               {error && (
                 <div className="text-red-500 text-sm mt-2">{error}</div>
               )}
