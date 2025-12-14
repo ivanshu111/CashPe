@@ -59,13 +59,4 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.pre("save", async function () {
-  if (this.isModified("password")) {
-    this.password = await hashPassword(this.password);
-  }
-  if (this.isModified("pin")) {
-    this.pin = await hashPassword(this.pin);
-  }
-});
-
 module.exports = mongoose.model("User", userSchema);

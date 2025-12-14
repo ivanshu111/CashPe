@@ -3,13 +3,20 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { login, api } from "../services/api"; // Import api instance
 import { loginSuccess } from "../slice/authSlice";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"; // Import icons
 
 const LoginPage = () => {
   const [email, setEmail] = useState("ivanshu@gmail.com");
   const [password, setPassword] = useState("ivanshu@123");
   const [error, setError] = useState(null);
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,13 +58,26 @@ const LoginPage = () => {
                   <label className="label">
                     <span className="label-text">Password</span>
                   </label>
-                  <input
-                    type="password"
-                    placeholder="password"
-                    className="input input-bordered w-full"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
+                  <div className="relative w-full">
+                    <input
+                      type={showPassword ? "text" : "password"} // Toggle type
+                      placeholder="password"
+                      className="input input-bordered w-full pr-10" // Add padding for icon
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                    >
+                      {showPassword ? (
+                        <EyeSlashIcon className="h-5 w-5 text-gray-500" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5 text-gray-500" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
               <Link

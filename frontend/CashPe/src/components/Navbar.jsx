@@ -1,6 +1,6 @@
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import NotificationBell from "./NotificationBell";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom"; // Import useLocation
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../slice/authSlice";
 import { Fragment } from "react";
@@ -11,10 +11,10 @@ import {
 } from "@heroicons/react/24/outline";
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", current: true, protected: true },
-  { name: "About", href: "/about", current: false, protected: false },
-  { name: "Admin", href: "/admin", current: false, protected: true, adminOnly: true },
-  { name: "Expense Tracker", href: "/expense-tracker-home", current: false, protected: true }, // Consolidated Expense Tracker Home
+  { name: "Dashboard", href: "/dashboard", protected: true },
+  { name: "About", href: "/about", protected: false },
+  { name: "Admin", href: "/admin", protected: true, adminOnly: true },
+  { name: "Expense Tracker", href: "/expense-tracker-home", protected: true }, // Consolidated Expense Tracker Home
 ];
 
 function classNames(...classes) {
@@ -24,6 +24,7 @@ function classNames(...classes) {
 export default function Navbar() {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const user = useSelector((state) => state.auth.user);
+  const location = useLocation(); // Get current location
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -83,12 +84,12 @@ export default function Navbar() {
                         key={item.name}
                         to={item.href}
                         className={classNames(
-                          item.current
-                            ? "bg-primary text-primary-content"
-                            : "text-base-content hover:bg-base-200",
-                          "rounded-md px-3 py-2 text-sm font-medium"
+                          location.pathname === item.href
+                            ? "bg-blue-600 text-white" // Active styles: blue background, white text
+                            : "text-base-content hover:bg-base-200", // Inactive styles
+                          "rounded-md px-3 py-2 text-sm font-medium" // Base styles for box
                         )}
-                        aria-current={item.current ? "page" : undefined}
+                        aria-current={location.pathname === item.href ? "page" : undefined}
                       >
                         {item.name}
                       </Link>
@@ -191,12 +192,12 @@ export default function Navbar() {
                   as="a"
                   href={item.href}
                   className={classNames(
-                    item.current
-                      ? "bg-primary text-primary-content"
-                      : "text-base-content hover:bg-base-200",
-                    "block rounded-md px-3 py-2 text-base font-medium"
+                    location.pathname === item.href
+                      ? "bg-blue-600 text-white" // Active styles for mobile: blue background, white text
+                      : "text-base-content hover:bg-base-200", // Inactive styles for mobile
+                    "block rounded-md px-3 py-2 text-base font-medium" // Base styles for mobile
                   )}
-                  aria-current={item.current ? "page" : undefined}
+                  aria-current={location.pathname === item.href ? "page" : undefined}
                 >
                   {item.name}
                 </Disclosure.Button>

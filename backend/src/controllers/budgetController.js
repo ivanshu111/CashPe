@@ -19,6 +19,18 @@ exports.setBudget = async (req, res) => {
         return res.status(400).json({ message: 'Month must be between 1 and 12.' });
     }
 
+    // Past date validation
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1; // JS months are 0-indexed
+
+    const inputYear = parseInt(year);
+    const inputMonth = parseInt(month);
+
+    if (inputYear < currentYear || (inputYear === currentYear && inputMonth < currentMonth)) {
+        return res.status(400).json({ message: 'Cannot set a budget for a past month.' });
+    }
+
     try {
         // Check if a budget already exists for the given month and year for this user
         let budget = await Budget.findOne({ userId, month, year });
@@ -82,7 +94,7 @@ exports.getBudget = async (req, res) => {
 // @access  Private
 exports.updateBudget = async (req, res) => {
     const { id } = req.params;
-    const { amount } = req.body;
+    const { amount, month, year } = req.body; // Destructure month and year
     const userId = req.user.id;
 
     if (!amount) {
@@ -90,6 +102,20 @@ exports.updateBudget = async (req, res) => {
     }
     if (amount <= 0) {
         return res.status(400).json({ message: 'Amount must be a positive number.' });
+    }
+
+    // Past date validation - requires month and year from frontend
+    if (month && year) {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1; // JS months are 0-indexed
+
+        const inputYear = parseInt(year);
+        const inputMonth = parseInt(month);
+
+        if (inputYear < currentYear || (inputYear === currentYear && inputMonth < currentMonth)) {
+            return res.status(400).json({ message: 'Cannot update a budget for a past month.' });
+        }
     }
 
     try {
@@ -109,3 +135,4 @@ exports.updateBudget = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+

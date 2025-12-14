@@ -29,7 +29,7 @@ function App() {
     <div className="flex flex-col min-h-screen font-montserrat">
       <Toaster position="top-right" reverseOrder={false} />
       <Navbar />
-      <main className="flex-grow max-w-screen-2xl mx-auto">
+      <main className="flex-grow max-w-screen-3xl mx-auto">
         <Outlet />
       </main>
       <Footer />

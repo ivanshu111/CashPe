@@ -50,12 +50,16 @@ const registerUser = async (req, res, next) => {
     
     let profilePicturePath = req.file ? `/uploads/profile-pictures/${req.file.filename}` : undefined;
 
+    // Hash password and pin before creating user
+    const hashedPassword = await hashPassword(password);
+    const hashedPin = await hashPassword(pin);
+
     const newUser = await User.create({
       name,
       email,
-      password, // Pass plain text password
+      password: hashedPassword, // Pass hashed password
       phone,
-      pin,
+      pin: hashedPin, // Pass hashed pin
       profilePicture: profilePicturePath,
     });
 

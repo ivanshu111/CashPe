@@ -19,13 +19,20 @@ Wallet Management:
 
 Transaction Management:
     Users can view their personal transaction history, distinguishing between credit and debit entries.
-    Admin Features (Accessible only by administrators):
-        Ability to view a comprehensive list of all registered users and their detailed profiles.
-        Search users efficiently by their name or email address.
-        Control user account status (activate or deactivate) as needed.
-        Access to a list of all system-wide financial transactions.
-        Dedicated view to see all transactions associated with a particular user.
-        Advanced sorting capabilities for transactions by amount or date, in both ascending and descending order, to facilitate analysis.
+
+Expense Tracker Module:
+    Track and categorize daily expenses.
+    View expense history with filters and sorting options.
+    Set monthly budgets for different categories.
+    Get notifications for budget overruns.
+
+Admin Features (Accessible only by administrators):
+    Ability to view a comprehensive list of all registered users and their detailed profiles.
+    Search users efficiently by their name or email address.
+    Control user account status (activate or deactivate) as needed.
+    Access to a list of all system-wide financial transactions.
+    Dedicated view to see all transactions associated with a particular user.
+    Advanced sorting capabilities for transactions by amount or date, in both ascending and descending order, to facilitate analysis.
 
 Notifications:
     Real-time notifications powered by WebSockets for instant updates on transactions and other important activities.
@@ -67,17 +74,20 @@ Project Structure Highlights:
 
 frontend/CashPe/: The root directory for the React application.
     src/components/: Houses reusable UI components like buttons, modals, and navigation elements.
-    src/pages/: Contains the main views or pages of the application (e.g., LoginPage, ProfilePage, AdminPage).
+    src/pages/: Contains the main views or pages of the application (e.g., LoginPage, ProfilePage, AdminPage, ExpenseManagementPage.jsx, BudgetManagementPage.jsx, CategoryManagementPage.jsx).
     src/services/api.js: Centralized module for all frontend API calls, configured with Axios interceptors for token handling and error management.
     src/slice/authSlice.js: A Redux Toolkit slice managing authentication-related state, including user data and tokens.
+    src/slice/expenseSlice.js: Redux Toolkit slice for managing expense-related state.
+    src/slice/budgetSlice.js: Redux Toolkit slice for managing budget-related state.
+    src/slice/categorySlice.js: Redux Toolkit slice for managing category-related state.
     src/utils/dateUtils.js: Utility functions, such as `formatDate`, for consistent and safe date rendering.
     src/routers/routes.jsx: Defines all frontend routes and their corresponding components, including protected routes.
 backend/: The root directory for the Node.js/Express.js API server.
     src/config/db.js: Manages the connection to the MongoDB database.
-    src/controllers/: Contains the business logic and request handlers for different API endpoints.
+    src/controllers/: Contains the business logic and request handlers for different API endpoints (e.g., expenseController.js, budgetController.js, categoryController.js).
     src/middlewares/: Custom Express middleware for authentication (`auth.js`), authorization (`adminAuth.js`), and file uploads (`upload.js`).
-    src/models/: Defines Mongoose schemas for the MongoDB collections (e.g., User, Wallet, Transaction).
-    src/routes/: Defines all backend API routes (e.g., authRoutes, walletRoutes, adminRoutes).
+    src/models/: Defines Mongoose schemas for the MongoDB collections (e.g., User, Wallet, Transaction, Expense.js, Budget.js, Category.js).
+    src/routes/: Defines all backend API routes (e.g., authRoutes, walletRoutes, adminRoutes, expenseRoutes.js, budgetRoutes.js, categoryRoutes.js).
     src/service/: Houses service-specific logic, such as `socketManager.js` for WebSockets and `redisManager.js` for Redis interactions.
     src/utils/: Contains utility functions like `jwt.js` for token generation and `hash.js` for password hashing.
     public/uploads/profile-pictures/: A directory to store uploaded user profile pictures.
@@ -104,3 +114,40 @@ Important Notes:
     Token Management: The system automatically handles JWT tokens for authentication. If a token expires or is invalid, the frontend will automatically log out the user.
     Password/PIN Hashing: All sensitive credentials are securely hashed.
     API Documentation: Visit /api-docs on your backend server (e.g., http://localhost:3000/api-docs) to view the Swagger UI documentation for all API endpoints.
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////Recommendation for future features
+
+      Foundational & User Engagement Features
+
+   1. Savings Goals (Vaults):
+       * Description: Allow users to create separate "vaults" or "pots" for specific savings goals (e.g., "Vacation Fund," "Emergency Fund"). Users could set a target amount and date,
+         and transfer money from their main wallet to these goals.
+       * Why it fits: It's a natural extension of personal finance management and encourages user engagement by helping them save.
+
+   2. QR Code Payments:
+       * Description: Implement functionality for users to generate a personal QR code and to scan others' codes to make payments instantly. This is a standard feature in modern digital
+         wallets.
+       * Why it fits: It enhances the "send money" feature with a faster, in-person payment method.
+
+   3. Recurring Payments & Subscriptions:
+       * Description: Allow users to schedule recurring automatic payments to other users (e.g., monthly allowance) or to set up mock subscriptions for bills.
+       * Why it fits: Adds a layer of automation and convenience, making the wallet more of a central financial hub for users.
+
+  Advanced Features
+
+   4. Enhanced Financial Reporting & Insights:
+       * Description: Go beyond basic expense tracking. Provide users with visual dashboards showing spending trends over time, comparisons between months, and intelligent insights into
+         their financial habits (e.g., "You spent 20% more on food this month").
+       * Why it fits: Leverages the existing expense, category, and budget data to provide more value to the user.
+
+   5. Bill Payment Integration:
+       * Description: Integrate with a service (or mock one) that allows users to pay real-world bills (utilities, credit cards, etc.) directly from their CashPe wallet. You could      
+         include features for bill reminders.
+       * Why it fits: Transforms the app from a simple P2P wallet into a comprehensive bill management tool.
+
+   6. Investment Module (Mock):
+       * Description: For a more ambitious feature, you could allow users to "invest" a portion of their wallet balance into mock stocks or cryptocurrencies. You would need to integrate
+         with a financial data API to get real-time price data.
+       * Why it fits: Introduces a new dimension to the application, targeting users interested in wealth-building.
+
+  I would recommend starting with Savings Goals or QR Code Payments as they are popular features that build directly upon your existing foundation.
