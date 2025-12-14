@@ -1,3 +1,4 @@
+const PDFDocument = require("pdfkit");
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
 const Wallet = require("../models/Wallet");
@@ -117,6 +118,76 @@ exports.getUserTransactions = async (req, res, next) => {
 
     res.status(200).json({ transactions });
   } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Download a PDF report of all transactions
+// @route   GET /api/admin/transactions/download
+// @access  Private/Admin
+exports.downloadTransactionsReport = async (req, res, next) => {
+  try {
+    const transactions = await Transaction.find({})
+      .populate("fromUser", "name email")
+      .populate("toUser", "name email")
+      .sort({ createdAt: -1 });
+
+    const doc = new PDFDocument({ margin: 30, size: 'A4' });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=transactions-report.pdf');
+
+    doc.pipe(res);
+
+    // Header
+    doc.fontSize(20).text("Transaction Report", { align: "center" }).moveDown();
+
+    // Report Details
+    doc.fontSize(10)
+       .text(`Report Generated: ${new Date().toLocaleDateString()}`, { align: "right" })
+       .text(`Total Transactions: ${transactions.length}`)
+       .moveDown(2);
+
+    // Table Header
+    const tableTop = doc.y;
+    const itemX = 30;
+    const dateX = itemX;
+    const fromX = 130;
+    const toX = 260;
+    const amountX = 390;
+    const statusX = 470;
+
+    doc.fontSize(10).font('Helvetica-Bold')
+       .text("Date", dateX, tableTop)
+       .text("From", fromX, tableTop)
+       .text("To", toX, tableTop)
+       .text("Amount", amountX, tableTop, { width: 80, align: 'right' })
+       .text("Status", statusX, tableTop)
+       .font('Helvetica');
+
+    const drawLine = (y) => doc.moveTo(itemX, y).lineTo(570, y).stroke();
+    drawLine(tableTop + 15);
+
+    // Table Rows
+    let yPos = tableTop + 25;
+    transactions.forEach(tx => {
+      if (yPos > 700) {
+        doc.addPage();
+        yPos = 30;
+      }
+      doc.fontSize(8)
+         .text(new Date(tx.createdAt).toLocaleDateString(), dateX, yPos)
+         .text(tx.fromUser ? tx.fromUser.name : "N/A", fromX, yPos, { width: 120, ellipsis: true })
+         .text(tx.toUser ? tx.toUser.name : "N/A", toX, yPos, { width: 120, ellipsis: true })
+         .text(`₹${tx.amount.toFixed(2)}`, amountX, yPos, { width: 80, align: 'right' })
+         .text(tx.status, statusX, yPos);
+      yPos += 20;
+    });
+
+    doc.end();
+
+  } catch (error) {
+    console.error("Error generating PDF report:", error);
     next(error);
   }
 };

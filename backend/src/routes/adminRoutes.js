@@ -1,6 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const adminController = require("../controllers/adminController");
+const {
+  getAllUsers,
+  getAllTransactions,
+  downloadTransactionsReport,
+  updateUserStatus,
+  getUserDetails,
+  getUserTransactions,
+} = require("../controllers/adminController");
 const auth = require("../middlewares/auth"); // Assuming auth middleware exists
 const adminAuth = require("../middlewares/adminAuth"); // Custom middleware for admin role check
 
@@ -25,7 +32,7 @@ router.use(adminAuth);
  *       403:
  *         description: Forbidden, only admins can access.
  */
-router.get("/users", adminController.getAllUsers);
+router.get("/users", getAllUsers);
 
 /**
  * @swagger
@@ -44,7 +51,33 @@ router.get("/users", adminController.getAllUsers);
  *       403:
  *         description: Forbidden, only admins can access.
  */
-router.get("/transactions", adminController.getAllTransactions);
+router.get("/transactions", getAllTransactions);
+
+/**
+ * @swagger
+ * /api/admin/transactions/download:
+ *   get:
+ *     summary: Download transactions report
+ *     description: Download a PDF report of all transactions. Accessible only by admin.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: PDF report of transactions.
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       401:
+ *         description: Unauthorized.
+ *       403:
+ *         description: Forbidden, only admins can access.
+ *       500:
+ *         description: Internal server error.
+ */
+router.get("/transactions/download", downloadTransactionsReport);
 
 /**
  * @swagger
@@ -84,7 +117,7 @@ router.get("/transactions", adminController.getAllTransactions);
  *       404:
  *         description: User not found.
  */
-router.put("/users/:userId/status", adminController.updateUserStatus);
+router.put("/users/:userId/status", updateUserStatus);
 
 /**
  * @swagger
@@ -112,7 +145,7 @@ router.put("/users/:userId/status", adminController.updateUserStatus);
  *       404:
  *         description: User not found.
  */
-router.get("/users/:userId/details", adminController.getUserDetails);
+router.get("/users/:userId/details", getUserDetails);
 
 /**
  * @swagger
@@ -131,7 +164,7 @@ router.get("/users/:userId/details", adminController.getUserDetails);
  *           type: string
  *         description: The ID of the user to retrieve transactions for.
  *     responses:
- *       200:
+_      200:
  *         description: A list of transactions for the user.
  *       401:
  *         description: Unauthorized.
@@ -140,6 +173,6 @@ router.get("/users/:userId/details", adminController.getUserDetails);
  *       404:
  *         description: User not found.
  */
-router.get("/users/:userId/transactions", adminController.getUserTransactions);
+router.get("/users/:userId/transactions", getUserTransactions);
 
 module.exports = router;

@@ -5,6 +5,7 @@ import {
   updateUserStatus,
   getUserDetails,
   searchUsers, // Import searchUsers
+  api, // Import api
 } from "../services/api";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +20,7 @@ const AdminPage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
   const [activeTab, setActiveTab] = useState("users"); // 'users' or 'transactions'
+  const [isDownloading, setIsDownloading] = useState(false); // Add isDownloading state
 
   // Transactions Sorting states
   const [sortTransactionsBy, setSortTransactionsBy] = useState("createdAt");
@@ -159,6 +161,28 @@ const AdminPage = () => {
     } catch (err) {
       alert("Failed to fetch user details.");
       console.error("Error fetching user details:", err);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    setIsDownloading(true);
+    try {
+      const response = await api.get("/admin/transactions/download", {
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "transactions-report.pdf");
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+      alert("Failed to download PDF report.");
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -346,9 +370,53 @@ const AdminPage = () => {
         {/* Transaction Management Section */}
         {activeTab === "transactions" && (
           <section>
-            <h2 className="text-3xl font-semibold mb-6">
-              Transaction Management
-            </h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-3xl font-semibold">Transaction Management</h2>
+              <button
+                onClick={handleDownloadPDF}
+                disabled={isDownloading}
+                className={`
+    flex items-center gap-2
+    px-6 py-3
+    rounded-xl
+    font-semibold
+    text-white
+    shadow-lg
+    transition-all duration-300
+    bg-gradient-to-r from-emerald-500 to-teal-500
+    hover:from-emerald-600 hover:to-teal-600
+    active:scale-95
+    disabled:opacity-60 disabled:cursor-not-allowed
+  `}
+              >
+                {isDownloading ? (
+                  <>
+                    <svg
+                      className="w-5 h-5 animate-spin"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      />
+                    </svg>
+                    Downloading...
+                  </>
+                ) : (
+                  <>📄 Download PDF</>
+                )}
+              </button>
+            </div>
 
             {/* Sorting Controls */}
             <div className="mb-6 flex flex-wrap items-center gap-4">
