@@ -13,6 +13,11 @@ import AdminPage from "../pages/AdminPage.jsx"; // Import AdminPage
 import ProtectedRoute from "../components/ProtectedRoute.jsx";
 import UserTransactionsPage from "../pages/UserTransactionsPage.jsx"; // Import the new page
 
+// Import the new ExpenseTrackerHomePage
+import ExpenseTrackerHomePage from "../pages/ExpenseTrackerHomePage.jsx";
+import ReportPage from "../pages/ReportPage.jsx"; // Re-import ReportPage
+
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -65,6 +70,16 @@ const router = createBrowserRouter([
           {
             path: "/admin/users/:userId/transactions", // New route for user transactions
             element: <UserTransactionsPage />,
+          },
+          // Consolidated Expense Tracker Home Page
+          {
+            path: "/expense-tracker-home",
+            element: <ExpenseTrackerHomePage />,
+          },
+          // Dedicated Report Page
+          {
+            path: "/reports",
+            element: <ReportPage />,
           },
         ],
       },

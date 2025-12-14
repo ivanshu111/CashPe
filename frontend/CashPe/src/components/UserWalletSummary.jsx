@@ -24,7 +24,13 @@ const UserWalletSummary = () => {
       try {
         const response = await getWalletDetails(); // Call getWalletDetails
 
-        setDisplayedBalance(response.balance.toFixed(2));
+        if (response && typeof response.balance === 'number') {
+            setDisplayedBalance(response.balance.toFixed(2));
+        } else {
+            console.warn("Wallet details response missing or invalid balance:", response);
+            setDisplayedBalance("N/A"); // Fallback for display
+            setError("Invalid wallet balance data received."); // Set an error state
+        }
         setWalletOwnerName(response.name || user?.name || "User"); // Use name from wallet details, fallback to Redux user, then default
       } catch (err) {
         setError(err.message || "Failed to fetch wallet details.");

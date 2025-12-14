@@ -15,7 +15,7 @@ export const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = store.getState().auth.token;
-    console.log('Sending token:', token); // Added logging
+
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
@@ -35,7 +35,7 @@ api.interceptors.response.use(
       // Unauthorized, token might be expired or invalid
       store.dispatch(logout()); // Dispatch logout action
       toast.error("Session expired or unauthorized. Please log in again.");
-      window.location.href = '/'; // Redirect to home/login page
+      window.location.href = "/"; // Redirect to home/login page
     }
     return Promise.reject(error);
   }
@@ -133,7 +133,10 @@ export const getAllUsers = async () => {
   }
 };
 
-export const getAllTransactions = async (sortBy = "createdAt", sortOrder = "desc") => {
+export const getAllTransactions = async (
+  sortBy = "createdAt",
+  sortOrder = "desc"
+) => {
   try {
     const response = await api.get("/admin/transactions", {
       params: { sort_by: sortBy, sort_order: sortOrder },
@@ -171,7 +174,11 @@ export const deleteUserAccount = async () => {
   }
 };
 
-export const getUserTransactions = async (userId, sortBy = "createdAt", sortOrder = "desc") => {
+export const getUserTransactions = async (
+  userId,
+  sortBy = "createdAt",
+  sortOrder = "desc"
+) => {
   try {
     const response = await api.get(`/admin/users/${userId}/transactions`, {
       params: { sort_by: sortBy, sort_order: sortOrder },
@@ -181,4 +188,3 @@ export const getUserTransactions = async (userId, sortBy = "createdAt", sortOrde
     throw error.response.data;
   }
 };
-

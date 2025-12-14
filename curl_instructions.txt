@@ -1,0 +1,35 @@
+# Instructions for Testing Backend API Directly with curl
+
+To help diagnose the 404 error you are encountering, we need to test the backend API directly, bypassing the frontend and any proxy issues.
+
+**Step 1: Ensure Your Backend Server is Running**
+*   Make sure your Node.js/Express backend server is running and listening on port 3000. You should see a message like 'Server is running on port 3000' in its console.
+
+**Step 2: Get Your Authentication Token**
+*   Log in to your frontend application in your browser.
+*   Open your browser's Developer Tools (usually F12 or Ctrl+Shift+I).
+*   Go to the 'Network' tab.
+*   Find the `/api/auth/login` (or equivalent login) request.
+*   Click on it, go to the 'Response' tab, and copy the full JWT token (it will be a long string of characters). This token is needed for authenticated API calls.
+*   **Important:** This token has an expiration. If it expires, you'll need to get a new one by logging in again.
+
+**Step 3: Test the Backend Directly with `curl`**
+
+Open a new terminal or command prompt (separate from where your frontend and backend servers are running) and execute the following commands. **Replace `<YOUR_AUTH_TOKEN>` with the token you copied in Step 2.**
+
+**A. Set a Budget (if you haven't already)**
+This step ensures there's data for the GET request. Adjust `month` and `year` as needed for testing.
+
+```bash
+curl -X POST -H "Authorization: Bearer <YOUR_AUTH_TOKEN>" -H "Content-Type: application/json" -d '{"amount": 1500, "month": 12, "year": 2025}' http://localhost:3000/api/budget
+```
+
+**B. Get the Budget**
+This is the primary test for the route that's giving you a 404. Adjust `year` and `month` to match what you are testing (e.g., 2025/12).
+
+```bash
+curl -X GET -H "Authorization: Bearer <YOUR_AUTH_TOKEN>" http://localhost:3000/api/budget/2025/12
+```
+
+---
+**Please provide the *entire* output of the `curl` commands you execute.** This output is crucial for diagnosing the 404 error.

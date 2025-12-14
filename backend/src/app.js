@@ -5,6 +5,10 @@ const authRoutes = require("./routes/authRoutes");
 const walletRoutes = require("./routes/walletRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const userRoutes = require("./routes/userRoutes");
+const budgetRoutes = require("./routes/budgetRoutes"); // New
+const expenseRoutes = require("./routes/expenseRoutes"); // New
+const reportRoutes = require("./routes/reportRoutes"); // New
+const categoryRoutes = require("./routes/categoryRoutes"); // New
 
 const http = require("http");
 const {
@@ -72,6 +76,10 @@ app.use("/api/wallet", walletRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/budget", budgetRoutes); // New
+app.use("/api/expenses", expenseRoutes); // New
+app.use("/api/reports", reportRoutes); // New
+app.use("/api/categories", categoryRoutes); // New
 
 // Error handling middleware
 app.use((err, req, res, next) => {

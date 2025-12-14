@@ -13,7 +13,8 @@ import {
 const navigation = [
   { name: "Dashboard", href: "/dashboard", current: true, protected: true },
   { name: "About", href: "/about", current: false, protected: false },
-  { name: "Admin", href: "/admin", current: false, protected: true, adminOnly: true }, // New admin link
+  { name: "Admin", href: "/admin", current: false, protected: true, adminOnly: true },
+  { name: "Expense Tracker", href: "/expense-tracker-home", current: false, protected: true }, // Consolidated Expense Tracker Home
 ];
 
 function classNames(...classes) {
@@ -32,8 +33,21 @@ export default function Navbar() {
     navigate("/login");
   };
 
+  // Filter navigation items based on authentication status and user role
   const filteredNavigation = navigation.filter(
-    (item) => !item.protected || (isAuthenticated && (!item.adminOnly || user?.role === 'admin'))
+    (item) => {
+      // If the item is not protected, always show it.
+      if (!item.protected) return true;
+      // If protected, show only if authenticated.
+      if (item.protected && isAuthenticated) {
+        // If it's an admin-only item, check user role.
+        if (item.adminOnly) {
+          return user?.role === 'admin';
+        }
+        return true; // Show protected items for authenticated non-admin users
+      }
+      return false; // Hide protected items for unauthenticated users
+    }
   );
 
   return (

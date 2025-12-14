@@ -1,0 +1,392 @@
+# API Test Cases for Budget and Expense Tracker Module
+
+## Pre-requisites:
+*   A registered user and their authentication token.
+*   An admin user and their authentication token (for global category creation).
+
+## General Test Principles:
+*   All requests require an `Authorization: Bearer <TOKEN>` header.
+*   Replace `<USER_TOKEN>` and `<ADMIN_TOKEN>` with actual valid JWT tokens obtained after user login.
+*   Replace `<USER_ID>` with the actual ID of the logged-in user.
+*   Replace `<CATEGORY_ID>`, `<BUDGET_ID>`, `<EXPENSE_ID>` with IDs obtained from successful creation requests.
+*   Use a tool like Postman, Insomnia, or `curl` to execute these API requests.
+
+## 1. Category API Tests (`/api/categories`)
+
+### 1.1. Add Category (POST /api/categories) ✅✅✅
+*   **Test Case 1.1.1: Create a user-specific category successfully**
+    *   **Description:** A regular user adds a new category for their expenses.
+    *   **Request:** `POST /api/categories`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "name": "Groceries" }`
+    *   **Expected:** `201 Created`, JSON object containing the new category. Verify `category.name` is "Groceries" and `category.userId` matches `<USER_ID>`.
+*   **Test Case 1.1.2: Create another user-specific category**
+    *   **Description:** A regular user adds a second distinct category.
+    *   **Request:** `POST /api/categories`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "name": "Rent" }`
+    *   **Expected:** `201 Created`, JSON object containing the new category.
+*   **Test Case 1.1.3: Attempt to create a duplicate user-specific category**
+    *   **Description:** A user tries to add a category with a name they already own.
+    *   **Request:** `POST /api/categories`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "name": "Groceries" }`
+    *   **Expected:** `400 Bad Request`, error message like "Category with this name already exists for you."
+*   **Test Case 1.1.4: Create a global category (as Admin)**
+    *   **Description:** An admin user creates a category accessible to all users.
+    *   **Request:** `POST /api/categories`
+    *   **Headers:** `Authorization: Bearer <ADMIN_TOKEN>`
+    *   **Body:** `{ "name": "Utilities (Global)", "isGlobal": true }`
+    *   **Expected:** `201 Created`, JSON object containing the new category. Verify `category.name` is "Utilities (Global)" and `category.userId` is `null`.
+*   **Test Case 1.1.5: Attempt to create a global category (as regular user)**
+    *   **Description:** A regular user tries to create a global category. The system should default it to a user-specific category.
+    *   **Request:** `POST /api/categories`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "name": "Global Attempt", "isGlobal": true }`
+    *   **Expected:** `201 Created`, JSON object containing the new category. Verify `category.name` is "Global Attempt" and `category.userId` matches `<USER_ID>`.
+*   **Test Case 1.1.6: Invalid category name (empty)**
+    *   **Description:** Attempt to create a category with an empty name.
+    *   **Request:** `POST /api/categories`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "name": "" }`
+    *   **Expected:** `400 Bad Request`, error message like "Category name is required."
+
+### 1.2. Get Categories (GET /api/categories)
+*   **Test Case 1.2.1: Get all categories for a user**
+    *   **Description:** Retrieve all categories visible to the logged-in user (user-specific and global).
+    *   **Request:** `GET /api/categories`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `200 OK`, JSON array of categories. Verify that it includes "Groceries", "Rent", "Utilities (Global)", and "Global Attempt".
+
+### 1.3. Update Category (PUT /api/categories/:id)
+*   **Test Case 1.3.1: Update a user-specific category successfully**
+    *   **Description:** A user updates the name of one of their own categories.
+    *   **Pre-step:** Get the `_id` of the "Groceries" category created in 1.1.1. Let's call it `<GROCERIES_CATEGORY_ID>`.
+    *   **Request:** `PUT /api/categories/<GROCERIES_CATEGORY_ID>`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "name": "Updated Groceries" }`
+    *   **Expected:** `200 OK`, updated category object. Verify `category.name` is "Updated Groceries".
+*   **Test Case 1.3.2: Attempt to update another user's category**
+    *   **Description:** User A tries to update a category belonging to User B.
+    *   **Pre-step:** Create a category for a *different* user (or log in as another user and create one). Get its `_id`. Let's call it `<OTHER_USER_CATEGORY_ID>`.
+    *   **Request:** `PUT /api/categories/<OTHER_USER_CATEGORY_ID>`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "name": "Evil Update" }`
+    *   **Expected:** `403 Forbidden`, error message like "You are not authorized to update this category."
+*   **Test Case 1.3.3: Attempt to update a global category (as regular user)**
+    *   **Description:** A regular user tries to update a global category.
+    *   **Pre-step:** Get the `_id` of "Utilities (Global)" from 1.1.4. Let's call it `<GLOBAL_CATEGORY_ID>`.
+    *   **Request:** `PUT /api/categories/<GLOBAL_CATEGORY_ID>`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "name": "Global Update Attempt" }`
+    *   **Expected:** `403 Forbidden`, error message like "You are not authorized to update this category."
+*   **Test Case 1.3.4: Update a global category (as Admin)**
+    *   **Description:** An admin user updates a global category.
+    *   **Request:** `PUT /api/categories/<GLOBAL_CATEGORY_ID>`
+    *   **Headers:** `Authorization: Bearer <ADMIN_TOKEN>`
+    *   **Body:** `{ "name": "Global Utilities Bill" }`
+    *   **Expected:** `200 OK`, updated category object. Verify `category.name` is "Global Utilities Bill".
+
+### 1.4. Delete Category (DELETE /api/categories/:id)
+*   **Test Case 1.4.1: Attempt to delete a category linked to expenses**
+    *   **Description:** Try to delete a category that has one or more expenses associated with it. This should fail.
+    *   **Pre-steps:**
+        1.  Create a new user-specific category: `POST /api/categories` with `{ "name": "Test Category for Deletion" }`. Get its `_id` (e.g., `<TEST_CATEGORY_ID>`).
+        2.  Add an expense to this category: `POST /api/expenses` with `{ "categoryId": "<TEST_CATEGORY_ID>", "amount": 10, "date": "2026-01-01T00:00:00Z" }`.
+    *   **Request:** `DELETE /api/categories/<TEST_CATEGORY_ID>`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `400 Bad Request`, error message "Cannot delete category: Expenses are linked to it."
+*   **Test Case 1.4.2: Delete a user-specific category successfully (not linked to expenses)**
+    *   **Description:** Delete a user-specific category that has no associated expenses.
+    *   **Pre-step:** Create a new user-specific category with no expenses linked to it (e.g., "Global Attempt" from 1.1.5, or a newly created one). Get its `_id`. Let's call it `<UNLINKED_CATEGORY_ID>`.
+    *   **Request:** `DELETE /api/categories/<UNLINKED_CATEGORY_ID>`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `200 OK`, success message "Category deleted successfully."
+*   **Test Case 1.4.3: Attempt to delete another user's category**
+    *   **Description:** User A tries to delete a category belonging to User B.
+    *   **Request:** `DELETE /api/categories/<OTHER_USER_CATEGORY_ID>` (from 1.3.2)
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `403 Forbidden`.
+*   **Test Case 1.4.4: Attempt to delete a global category (as regular user)**
+    *   **Description:** A regular user tries to delete a global category.
+    *   **Request:** `DELETE /api/categories/<GLOBAL_CATEGORY_ID>` (from 1.3.4)
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `403 Forbidden`.
+*   **Test Case 1.4.5: Delete a global category (as Admin)**
+    *   **Description:** An admin user deletes a global category.
+    *   **Pre-step:** Ensure the global category "Global Utilities Bill" (from 1.3.4) is not linked to any expenses. If it is, delete those expenses first, or create a new unlinked global category to test with.
+    *   **Request:** `DELETE /api/categories/<GLOBAL_CATEGORY_ID>`
+    *   **Headers:** `Authorization: Bearer <ADMIN_TOKEN>`
+    *   **Expected:** `200 OK`, success message "Category deleted successfully."
+
+## 2. Budget API Tests (`/api/budget`)
+
+### 2.1. Set/Update Budget (POST /api/budget)
+*   **Test Case 2.1.1: Set a new monthly budget**
+    *   **Description:** A user sets their budget for a specific month and year.
+    *   **Request:** `POST /api/budget`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "amount": 1000, "month": 1, "year": 2026 }`
+    *   **Expected:** `201 Created`, JSON object of the new budget. Store its `_id` as `<BUDGET_ID_JAN_2026>`.
+*   **Test Case 2.1.2: Update an existing monthly budget (via POST)**
+    *   **Description:** A user updates the budget for a month that already has one set.
+    *   **Request:** `POST /api/budget`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "amount": 1200, "month": 1, "year": 2026 }` (same month/year as 2.1.1)
+    *   **Expected:** `200 OK`, updated budget object. Verify `budget.amount` is 1200.
+*   **Test Case 2.1.3: Invalid amount (negative)**
+    *   **Description:** Attempt to set a budget with a non-positive amount.
+    *   **Request:** `POST /api/budget`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "amount": -100, "month": 2, "year": 2026 }`
+    *   **Expected:** `400 Bad Request`, error message like "Amount must be a positive number."
+*   **Test Case 2.1.4: Missing fields**
+    *   **Description:** Attempt to set a budget with missing required fields.
+    *   **Request:** `POST /api/budget`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "amount": 500, "month": 3 }`
+    *   **Expected:** `400 Bad Request`, error message like "Please provide amount, month, and year."
+
+### 2.2. Get Budget (GET /api/budget/:year/:month)
+*   **Test Case 2.2.1: Get existing monthly budget**
+    *   **Description:** Retrieve the budget for a month that has one set.
+    *   **Request:** `GET /api/budget/2026/1`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `200 OK`, JSON object of the budget for Jan 2026. Verify `budget.amount` is 1200.
+*   **Test Case 2.2.2: Get non-existent monthly budget**
+    *   **Description:** Retrieve the budget for a month that has no budget set.
+    *   **Request:** `GET /api/budget/2027/1`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `404 Not Found`, error message "Budget not found for this month and year."
+*   **Test Case 2.2.3: Invalid month in path parameter**
+    *   **Description:** Request a budget with an invalid month number.
+    *   **Request:** `GET /api/budget/2026/13`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `400 Bad Request`, error message like "Month must be between 1 and 12."
+
+### 2.3. Update Budget (PUT /api/budget/:id)
+*   **Test Case 2.3.1: Update an existing monthly budget (via PUT)**
+    *   **Description:** A user updates their budget using the specific budget ID.
+    *   **Request:** `PUT /api/budget/<BUDGET_ID_JAN_2026>`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "amount": 1500 }`
+    *   **Expected:** `200 OK`, updated budget object. Verify `budget.amount` is 1500.
+*   **Test Case 2.3.2: Attempt to update another user's budget**
+    *   **Description:** User A tries to update a budget belonging to User B.
+    *   **Pre-step:** Create a budget for a *different* user. Get its `_id`. Let's call it `<OTHER_USER_BUDGET_ID>`.
+    *   **Request:** `PUT /api/budget/<OTHER_USER_BUDGET_ID>`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "amount": 2000 }`
+    *   **Expected:** `404 Not Found`, error message like "Budget not found or you do not own this budget."
+*   **Test Case 2.3.3: Invalid amount in update**
+    *   **Description:** Attempt to update a budget with a non-positive amount.
+    *   **Request:** `PUT /api/budget/<BUDGET_ID_JAN_2026>`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "amount": 0 }`
+    *   **Expected:** `400 Bad Request`, error message like "Amount must be a positive number."
+
+## 3. Expense API Tests (`/api/expenses`)
+
+### 3.1. Add Expense (POST /api/expenses)
+*   **Test Case 3.1.1: Add a new expense successfully**
+    *   **Description:** A user adds a new expense for an existing category.
+    *   **Pre-step:** Use the `_id` of the "Updated Groceries" category (or create a new one). Let's call it `<GROCERIES_CATEGORY_ID>`.
+    *   **Request:** `POST /api/expenses`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "categoryId": "<GROCERIES_CATEGORY_ID>", "amount": 50.75, "description": "Weekly shopping", "date": "2026-01-10T10:00:00Z" }`
+    *   **Expected:** `201 Created`, JSON object of the new expense. Store its `_id` as `<EXPENSE_ID_1>`.
+*   **Test Case 3.1.2: Add another expense for a different category**
+    *   **Description:** Add another expense to a different category for the same user.
+    *   **Pre-step:** Use the `_id` of the "Rent" category (or create a new one). Let's call it `<RENT_CATEGORY_ID>`.
+    *   **Request:** `POST /api/expenses`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "categoryId": "<RENT_CATEGORY_ID>", "amount": 800, "description": "Monthly rent payment", "date": "2026-01-01T08:00:00Z" }`
+    *   **Expected:** `201 Created`, JSON object of the new expense. Store its `_id` as `<EXPENSE_ID_2>`.
+*   **Test Case 3.1.3: Invalid amount (zero or negative)**
+    *   **Description:** Attempt to add an expense with a non-positive amount.
+    *   **Request:** `POST /api/expenses`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "categoryId": "<GROCERIES_CATEGORY_ID>", "amount": 0, "description": "Free stuff", "date": "2026-01-11T12:00:00Z" }`
+    *   **Expected:** `400 Bad Request`, error message like "Amount must be a positive number."
+*   **Test Case 3.1.4: Invalid categoryId**
+    *   **Description:** Attempt to add an expense with a non-existent category ID.
+    *   **Request:** `POST /api/expenses`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "categoryId": "60c72b2f9c1e7a001c8e1d7a", "amount": 20, "description": "Bad category", "date": "2026-01-12T14:00:00Z" }` (use a random, but valid format, ObjectId)
+    *   **Expected:** `404 Not Found`, error message "Category not found."
+*   **Test Case 3.1.5: Future date**
+    *   **Description:** Attempt to add an expense with a date in the future.
+    *   **Request:** `POST /api/expenses`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "categoryId": "<GROCERIES_CATEGORY_ID>", "amount": 10, "description": "Future expense", "date": "2030-01-01T00:00:00Z" }`
+    *   **Expected:** `400 Bad Request`, error message "Invalid or future date provided."
+
+### 3.2. Get Expenses (GET /api/expenses)
+*   **Test Case 3.2.1: Get all expenses for a user (no filters)**
+    *   **Description:** Retrieve all expenses for the logged-in user.
+    *   **Request:** `GET /api/expenses`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `200 OK`, JSON array containing all expenses added by the user (e.g., `<EXPENSE_ID_1>`, `<EXPENSE_ID_2>`).
+*   **Test Case 3.2.2: Filter expenses by category**
+    *   **Description:** Retrieve expenses filtered by a specific category.
+    *   **Request:** `GET /api/expenses?category=<GROCERIES_CATEGORY_ID>`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `200 OK`, JSON array containing only expenses linked to `<GROCERIES_CATEGORY_ID>`.
+*   **Test Case 3.2.3: Filter expenses by date range**
+    *   **Description:** Retrieve expenses within a specified date range.
+    *   **Request:** `GET /api/expenses?startDate=2026-01-01&endDate=2026-01-05`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `200 OK`, JSON array containing expenses from 2026-01-01 to 2026-01-05 (e.g., `<EXPENSE_ID_2>`).
+*   **Test Case 3.2.4: Filter expenses by both category and date range**
+    *   **Description:** Retrieve expenses matching both a category and a date range.
+    *   **Request:** `GET /api/expenses?category=<GROCERIES_CATEGORY_ID>&startDate=2026-01-01&endDate=2026-01-31`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `200 OK`, JSON array containing "Groceries" expenses within Jan 2026.
+*   **Test Case 3.2.5: Pagination (page 1, limit 1)**
+    *   **Description:** Test retrieving only the first expense using pagination.
+    *   **Request:** `GET /api/expenses?page=1&limit=1`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `200 OK`, JSON array with 1 expense, `currentPage: 1`, `totalPages` and `totalItems` reflecting the total count.
+*   **Test Case 3.2.6: Pagination (page 2, limit 1)**
+    *   **Description:** Test retrieving the second expense using pagination.
+    *   **Request:** `GET /api/expenses?page=2&limit=1`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `200 OK`, JSON array with the next 1 expense, `currentPage: 2`.
+
+### 3.3. Get Expense by ID (GET /api/expenses/:id)
+*   **Test Case 3.3.1: Get an existing expense by ID**
+    *   **Description:** Retrieve a specific expense using its ID.
+    *   **Request:** `GET /api/expenses/<EXPENSE_ID_1>`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `200 OK`, JSON object of `<EXPENSE_ID_1>`.
+*   **Test Case 3.3.2: Get a non-existent expense by ID**
+    *   **Description:** Attempt to retrieve an expense with an invalid ID.
+    *   **Request:** `GET /api/expenses/60c72b2f9c1e7a001c8e1d7b` (use a random, but valid format, ObjectId)
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `404 Not Found`, error message like "Expense not found or you do not own this expense."
+*   **Test Case 3.3.3: Attempt to get another user's expense by ID**
+    *   **Description:** User A tries to retrieve an expense belonging to User B.
+    *   **Pre-step:** Add an expense for a *different* user. Get its `_id`. Let's call it `<OTHER_USER_EXPENSE_ID>`.
+    *   **Request:** `GET /api/expenses/<OTHER_USER_EXPENSE_ID>`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `404 Not Found`.
+
+### 3.4. Update Expense (PUT /api/expenses/:id)
+*   **Test Case 3.4.1: Update amount and description successfully**
+    *   **Description:** Update multiple fields of an existing expense.
+    *   **Request:** `PUT /api/expenses/<EXPENSE_ID_1>`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "amount": 55.00, "description": "Updated weekly shopping" }`
+    *   **Expected:** `200 OK`, updated expense object. Verify fields are updated.
+*   **Test Case 3.4.2: Update category**
+    *   **Description:** Change the category of an expense.
+    *   **Pre-step:** Create a new category for the user (e.g., "Food"). Get its `_id`. Let's call it `<FOOD_CATEGORY_ID>`.
+    *   **Request:** `PUT /api/expenses/<EXPENSE_ID_1>`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "categoryId": "<FOOD_CATEGORY_ID>" }`
+    *   **Expected:** `200 OK`, updated expense object. Verify `categoryId` is changed.
+*   **Test Case 3.4.3: Invalid amount in update**
+    *   **Description:** Attempt to update an expense with a non-positive amount.
+    *   **Request:** `PUT /api/expenses/<EXPENSE_ID_1>`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "amount": -10 }`
+    *   **Expected:** `400 Bad Request`, error message like "Amount must be a positive number."
+*   **Test Case 3.4.4: Invalid category ID in update**
+    *   **Description:** Attempt to update an expense with a non-existent category ID.
+    *   **Request:** `PUT /api/expenses/<EXPENSE_ID_1>`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "categoryId": "60c72b2f9c1e7a001c8e1d7c" }`
+    *   **Expected:** `404 Not Found`, error message "Category not found."
+*   **Test Case 3.4.5: Attempt to update another user's expense**
+    *   **Description:** User A tries to update an expense belonging to User B.
+    *   **Request:** `PUT /api/expenses/<OTHER_USER_EXPENSE_ID>` (from 3.3.3)
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Body:** `{ "amount": 999 }`
+    *   **Expected:** `404 Not Found`.
+
+### 3.5. Delete Expense (DELETE /api/expenses/:id)
+*   **Test Case 3.5.1: Delete an expense successfully**
+    *   **Description:** Delete an existing expense.
+    *   **Request:** `DELETE /api/expenses/<EXPENSE_ID_2>` (e.g., the "Rent" expense)
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `200 OK`, success message "Expense deleted successfully."
+    *   **Verification:** Try to `GET /api/expenses/<EXPENSE_ID_2>`, it should return `404 Not Found`.
+*   **Test Case 3.5.2: Attempt to delete a non-existent expense**
+    *   **Description:** Try to delete an expense with an invalid ID.
+    *   **Request:** `DELETE /api/expenses/60c72b2f9c1e7a001c8e1d7d`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `404 Not Found`.
+*   **Test Case 3.5.3: Attempt to delete another user's expense**
+    *   **Description:** User A tries to delete an expense belonging to User B.
+    *   **Request:** `DELETE /api/expenses/<OTHER_USER_EXPENSE_ID>` (from 3.3.3)
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `404 Not Found`.
+
+## 4. Report API Tests (`/api/reports`)
+
+### 4.1. Get Monthly Summary (GET /api/reports/monthly/:year/:month)
+*   **Test Case 4.1.1: Get monthly summary with expenses and budget**
+    *   **Description:** Retrieve the summary for a month where a budget is set and expenses exist.
+    *   **Pre-steps:**
+        1.  Ensure Jan 2026 has a budget (e.g., 1500 from 2.3.1).
+        2.  Ensure some expenses exist for Jan 2026 (e.g., `<EXPENSE_ID_1>`). Add another expense if needed, e.g., for "Food" category, 30.00, date "2026-01-15T09:00:00Z".
+    *   **Request:** `GET /api/reports/monthly/2026/1`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `200 OK`, JSON object containing:
+        *   `totalExpenses`: Correct sum of all Jan 2026 expenses.
+        *   `budget`: `1500`.
+        *   `remainingBudget`: Calculated value.
+        *   `isBudgetCrossed`: `true` or `false` based on comparison.
+        *   `categoryBreakdown`: Array of objects showing total amounts per category (e.g., "Updated Groceries", "Food").
+        *   `mostExpensiveCategory`: Object identifying the category with the highest spend.
+*   **Test Case 4.1.2: Get monthly summary with no expenses, but with budget**
+    *   **Description:** Retrieve summary for a month with a budget but no expenses.
+    *   **Pre-step:** Set a budget for Feb 2026: `POST /api/budget` with `{ "amount": 700, "month": 2, "year": 2026 }`.
+    *   **Request:** `GET /api/reports/monthly/2026/2`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `200 OK`, `totalExpenses: 0`, `budget: 700`, `remainingBudget: 700`, `isBudgetCrossed: false`, `categoryBreakdown: []`, `mostExpensiveCategory: null`.
+*   **Test Case 4.1.3: Get monthly summary with expenses, but no budget**
+    *   **Description:** Retrieve summary for a month with expenses but no budget.
+    *   **Pre-step:** Add an expense for Mar 2026, e.g., to "Food" category, amount 100, date "2026-03-05T10:00:00Z". Do *not* set a budget for Mar 2026.
+    *   **Request:** `GET /api/reports/monthly/2026/3`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `200 OK`, `totalExpenses: 100`, `budget: 0`, `remainingBudget: -100`, `isBudgetCrossed: false`, correct `categoryBreakdown`.
+*   **Test Case 4.1.4: Invalid month in path parameter**
+    *   **Description:** Request a monthly report with an invalid month number.
+    *   **Request:** `GET /api/reports/monthly/2026/13`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `400 Bad Request`, error message like "Month must be between 1 and 12."
+
+### 4.2. Get Yearly Summary (GET /api/reports/yearly/:year)
+*   **Test Case 4.2.1: Get yearly summary with data for multiple months**
+    *   **Description:** Retrieve the summary for a year with various budget and expense data across months.
+    *   **Pre-steps:** Ensure data exists for Jan, Feb, Mar 2026 as per previous tests. Add more budgets/expenses for other months in 2026 if desired for more comprehensive testing.
+    *   **Request:** `GET /api/reports/yearly/2026`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `200 OK`, JSON object containing:
+        *   `year: 2026`
+        *   `totalYearlyExpenses`: Correct sum of all expenses for 2026.
+        *   `monthlySummaries`: Array of 12 objects, each representing a month. Verify `month`, `totalExpenses`, `budget`, `remainingBudget`, `isBudgetCrossed` for each. Months with no data should show 0 for expenses/budget.
+*   **Test Case 4.2.2: Get yearly summary with no data**
+    *   **Description:** Retrieve summary for a year with no budgets or expenses.
+    *   **Request:** `GET /api/reports/yearly/2027`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `200 OK`, `totalYearlyExpenses: 0`, `monthlySummaries` array of 12 objects, each with 0 for expenses/budget.
+*   **Test Case 4.2.3: Invalid year in path parameter**
+    *   **Description:** Request a yearly report with an invalid year (e.g., non-numeric).
+    *   **Request:** `GET /api/reports/yearly/invalidyear`
+    *   **Headers:** `Authorization: Bearer <USER_TOKEN>`
+    *   **Expected:** `500 Server error` (or 400 Bad Request, depending on exact parsing error in controller).
+
+## 5. Authentication Failure Tests
+
+*   **Test Case 5.1.1: Access protected route without token**
+    *   **Description:** Attempt to access any protected route without providing an Authorization header.
+    *   **Request:** `GET /api/categories`
+    *   **Headers:** (None)
+    *   **Expected:** `401 Unauthorized`
+*   **Test Case 5.1.2: Access protected route with invalid token**
+    *   **Description:** Attempt to access any protected route with a malformed or expired JWT token.
+    *   **Request:** `GET /api/categories`
+    *   **Headers:** `Authorization: Bearer invalidtoken`
+    *   **Expected:** `401 Unauthorized`

@@ -1,0 +1,153 @@
+# Backend Development Plan: Monthly Budget and Expense Tracker Module
+
+This document outlines the steps for implementing the backend functionalities for the Monthly Budget and Expense Tracker module within the CashPe project.
+
+## I. Database Schema Design
+
+We will need new models to store budget and expense information. We might also need a `Category` model if not already present.
+
+### 1. `Category` Model (if not existing)
+*   **Purpose:** To store predefined or user-defined expense categories.
+*   **Fields:**
+    *   `_id` (ObjectId, Primary Key)
+    *   `name` (String, Unique, e.g., "Food", "Rent", "Travel")
+    *   `userId` (ObjectId, Foreign Key to User._id, Optional - for user-defined categories)
+
+### 2. `Budget` Model
+*   **Purpose:** To store the monthly budget set by a user.
+*   **Fields:**
+    *   `_id` (ObjectId, Primary Key)
+    *   `userId` (ObjectId, Foreign Key to User._id, Required)
+    *   `amount` (Number, Required, stores the budget amount)
+    *   `month` (Number, Required, 1-12)
+    *   `year` (Number, Required)
+    *   `createdAt` (Date, Defaults to current timestamp)
+    *   `updatedAt` (Date, Defaults to current timestamp)
+*   **Indexes:** Compound index on `userId`, `month`, `year` to ensure unique budget per user per month/year.
+
+### 3. `Expense` Model
+*   **Purpose:** To store individual expense entries made by a user.
+*   **Fields:**
+    *   `_id` (ObjectId, Primary Key)
+    *   `userId` (ObjectId, Foreign Key to User._id, Required)
+    *   `categoryId` (ObjectId, Foreign Key to Category._id, Required)
+    *   `amount` (Number, Required, must be positive)
+    *   `description` (String, Optional)
+    *   `date` (Date, Required, stores the exact date of the expense)
+    *   `month` (Number, Required, derived from `date`)
+    *   `year` (Number, Required, derived from `date`)
+    *   `createdAt` (Date, Defaults to current timestamp)
+    *   `updatedAt` (Date, Defaults to current timestamp)
+
+## II. API Endpoints
+
+All endpoints should be protected by authentication middleware (`auth.js`).
+
+### 1. Budget Management (`/api/budget`)
+*   `POST /api/budget`: Set a monthly budget for the logged-in user.
+    *   **Request Body:** `{ "amount": number, "month": number, "year": number }`
+    *   **Response:** Created Budget object.
+*   `GET /api/budget/:year/:month`: Get the monthly budget for a specific month/year for the logged-in user.
+    *   **Response:** Budget object or null if not set.
+*   `PUT /api/budget/:id`: Update an existing monthly budget.
+    *   **Request Body:** `{ "amount": number }`
+    *   **Response:** Updated Budget object.
+
+### 2. Expense Management (`/api/expenses`)
+*   `POST /api/expenses`: Add a new expense.
+    *   **Request Body:** `{ "categoryId": string, "amount": number, "description": string, "date": string (ISO 8601) }`
+    *   **Response:** Created Expense object.
+*   `GET /api/expenses`: Get all expenses for the logged-in user (with pagination/default limits).
+    *   **Query Params:** `?page=1&limit=10`
+    *   **Response:** Array of Expense objects.
+*   `GET /api/expenses/:id`: Get a single expense by ID.
+    *   **Response:** Expense object.
+*   `PUT /api/expenses/:id`: Update an existing expense.
+    *   **Request Body:** `{ "categoryId"?: string, "amount"?: number, "description"?: string, "date"?: string }`
+    *   **Response:** Updated Expense object.
+*   `DELETE /api/expenses/:id`: Delete an expense.
+    *   **Response:** Success message.
+
+### 3. Expense Search & Filter (`/api/expenses/search-filter`)
+*   `GET /api/expenses/search-filter`: Search and filter expenses.
+    *   **Query Params:**
+        *   `?category=:categoryId` (Filter by category)
+        *   `?startDate=:date&endDate=:date` (Filter by date range)
+        *   Combine `category`, `startDate`, `endDate`.
+    *   **Response:** Array of filtered Expense objects.
+
+### 4. Expense Summaries (`/api/reports`)
+*   `GET /api/reports/monthly/:year/:month`: Get monthly expense summary and category-wise breakdown.
+    *   **Response:**
+        ```json
+        {
+          "totalExpenses": number,
+          "budget": number,
+          "remainingBudget": number,
+          "isBudgetCrossed": boolean,
+          "categoryBreakdown": [
+            { "categoryId": string, "categoryName": string, "totalAmount": number }
+          ],
+          "mostExpensiveCategory": { "categoryId": string, "categoryName": string, "totalAmount": number } | null
+        }
+        ```
+*   `GET /api/reports/yearly/:year`: Get yearly expense summary.
+    *   **Response:**
+        ```json
+        {
+          "totalExpenses": number,
+          "monthlySummaries": [
+            { "month": number, "totalExpenses": number, "budget": number }
+          ]
+        }
+        ```
+
+## III. Business Logic & Services
+
+### 1. Validation Logic
+*   **Expense Validation:**
+    *   Ensure `amount` is a positive number.
+    *   Validate `categoryId` exists in the `Category` collection.
+    *   Validate `date` format and ensure it's not in the future.
+*   **Budget Validation:**
+    *   Ensure `amount` is a positive number.
+    *   Validate `month` (1-12) and `year` (e.g., current year or recent past/future).
+
+### 2. Budget Tracking
+*   When an expense is added/updated, dynamically calculate the `currentMonthExpenses` and compare it with the `Budget.amount` for the respective month/year to determine `isBudgetCrossed`.
+
+### 3. Summary Calculations
+*   **Monthly Summary:**
+    *   Sum `amount` from all `Expense` documents for a given `userId`, `month`, and `year`.
+    *   Fetch the `Budget` for that `userId`, `month`, and `year`.
+    *   Calculate `remainingBudget` and `isBudgetCrossed`.
+    *   Group expenses by `categoryId` for category breakdown.
+    *   Identify the `mostExpensiveCategory` by finding the category with the highest `totalAmount`.
+*   **Yearly Summary:**
+    *   Iterate through each month of the given year.
+    *   For each month, perform a monthly summary calculation (similar to above, but might be less detailed).
+    *   Aggregate `totalExpenses` for the entire year.
+
+### 4. Error Handling
+*   Implement robust error handling for invalid inputs, database errors, and unauthorized access.
+*   Return meaningful error messages and appropriate HTTP status codes.
+
+## IV. Integration with Existing Backend
+
+*   **Authentication & Authorization:** All API endpoints must utilize the existing `auth` middleware (`src/middlewares/auth.js`) to ensure only authenticated users can access and manage their own budget and expenses.
+*   **User Context:** The `req.user.id` (or equivalent) from the authentication middleware will be used to associate `Budget` and `Expense` records with the correct user.
+*   **File Structure:** New models will be placed in `src/models/`, controllers in `src/controllers/`, and routes in `src/routes/`. A new service directory `src/service/budgetExpenseService.js` could encapsulate complex business logic.
+
+## V. Verification/Testing
+
+*   **Unit Tests:**
+    *   Test individual validation functions for budget and expense data.
+    *   Test summary calculation logic (`totalExpenses`, `remainingBudget`, `isBudgetCrossed`, `categoryBreakdown`, `mostExpensiveCategory`).
+*   **Integration Tests:**
+    *   Test all API endpoints for correct behavior with valid and invalid data.
+    *   Verify authentication and authorization work as expected for each endpoint.
+    *   Confirm that `Budget` and `Expense` records are correctly associated with users.
+    *   Test search and filter functionality with various combinations of parameters.
+    *   Verify monthly and yearly summaries provide accurate data.
+*   **Edge Cases:** Test scenarios like zero expenses, budget not set, expenses exceeding budget, and empty categories.
+*   **Performance Testing:** For summary endpoints, consider performance with a large number of expenses.
