@@ -12,8 +12,20 @@ const initSocketManager = (server) => {
   });
 
   // Configure Redis adapter
-  const pubClient = new Redis(process.env.REDIS_URI); 
-  const subClient = pubClient.duplicate();
+  const redisOpts = {
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false,
+  };
+  const redisUri = process.env.REDIS_URI;
+  const pubClient = redisUri
+    ? new Redis(redisUri, redisOpts)
+    : new Redis(redisOpts);
+  const subClient = redisUri
+    ? new Redis(redisUri, redisOpts)
+    : new Redis(redisOpts);
+
+  pubClient.on("error", (err) => console.error("Redis pub error:", err));
+  subClient.on("error", (err) => console.error("Redis sub error:", err));
 
   io.adapter(createAdapter(pubClient, subClient));
 
