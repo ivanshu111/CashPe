@@ -3,7 +3,9 @@ import store from "../store";
 import { logout } from "../slice/authSlice"; // Import logout action
 import toast from "react-hot-toast"; // Import toast for notifications
 
-const API_BASE_URL = "/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : "/api";
 
 export const api = axios.create({
   baseURL: API_BASE_URL,

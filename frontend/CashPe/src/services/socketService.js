@@ -14,8 +14,7 @@ export const initSocket = (userId) => {
   const token = store.getState().auth.token;
 
   // Connect to the socket server
-  // Make sure to replace with your actual backend URL
-  socket = io("http://localhost:3000", {
+  socket = io(import.meta.env.VITE_API_URL || "http://localhost:3000", {
     auth: {
       token,
     },

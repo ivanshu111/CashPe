@@ -12,7 +12,7 @@ const initSocketManager = (server) => {
   });
 
   // Configure Redis adapter
-  const pubClient = new Redis(); // Connects to redis://127.0.0.1:6379 by default
+  const pubClient = new Redis(process.env.REDIS_URI); 
   const subClient = pubClient.duplicate();
 
   io.adapter(createAdapter(pubClient, subClient));
