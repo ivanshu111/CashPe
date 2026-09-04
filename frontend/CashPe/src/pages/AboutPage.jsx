@@ -138,9 +138,9 @@ const AboutPage = () => {
             className="mx-auto mt-20 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-1 lg:mx-0 lg:max-w-none lg:grid-cols-1"
           >
             {team.map((person) => (
-              <li key={person.name}>
+              <li key={person.name} className="flex flex-col items-center">
                 <img
-                  className="aspect-[14/13] w-full rounded-2xl object-cover"
+                  className="h-48 w-48 rounded-2xl object-cover"
                   src={person.imageUrl}
                   alt=""
                 />
