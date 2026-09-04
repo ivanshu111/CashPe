@@ -1,9 +1,10 @@
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import NotificationBell from "./NotificationBell";
-import { Link, useNavigate, useLocation } from "react-router-dom"; // Import useLocation
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../slice/authSlice";
 import { Fragment } from "react";
+import { getImageUrl } from "../utils/imageUtils";
 import {
   Bars3Icon,
   XMarkIcon,
@@ -111,10 +112,7 @@ export default function Navbar() {
                           {user && user.profilePicture ? (
                             <img
                               className="h-8 w-8 rounded-full"
-                              src={`http://localhost:3000${user.profilePicture.replace(
-                                "/public",
-                                ""
-                              )}`}
+                              src={getImageUrl(user.profilePicture)}
                               alt="User Profile"
                               crossOrigin="anonymous"
                             />

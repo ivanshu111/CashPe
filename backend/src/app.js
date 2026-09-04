@@ -24,7 +24,13 @@ const path = require("path");
 const helmet = require("helmet");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
+const fs = require("fs");
 const app = express();
+
+const uploadDir = path.join(__dirname, "..", "public", "uploads", "profile-pictures");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 const server = http.createServer(app);
 initSocketManager(server);

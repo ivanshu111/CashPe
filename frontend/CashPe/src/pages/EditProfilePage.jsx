@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { updateUserProfile } from "../services/api"; // This will be created next
-import { loginSuccess } from "../slice/authSlice"; // Use loginSuccess to update user in store
+import { updateUserProfile } from "../services/api";
+import { loginSuccess } from "../slice/authSlice";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-hot-toast";
+import { getImageUrl } from "../utils/imageUtils";
 
 const EditProfilePage = () => {
   const { user } = useSelector((state) => state.auth);
@@ -24,7 +25,7 @@ const EditProfilePage = () => {
       setPhone(user.phone || "");
       if (user.profilePicture) {
         setPreviewProfilePicture(
-          `http://localhost:3000${user.profilePicture.replace("/public", "")}`
+          getImageUrl(user.profilePicture)
         );
       }
     }

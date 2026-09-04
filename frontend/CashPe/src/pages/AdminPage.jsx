@@ -4,10 +4,11 @@ import {
   getAllTransactions,
   updateUserStatus,
   getUserDetails,
-  searchUsers, // Import searchUsers
-  api, // Import api
+  searchUsers,
+  api,
 } from "../services/api";
 import { useSelector } from "react-redux";
+import { getImageUrl } from "../utils/imageUtils";
 import { useNavigate } from "react-router-dom";
 
 const AdminPage = () => {
@@ -519,10 +520,7 @@ const AdminPage = () => {
               {selectedUser.profilePicture && (
                 <div className="flex justify-center mb-6">
                   <img
-                    src={`http://localhost:3000${selectedUser.profilePicture.replace(
-                      "/public",
-                      ""
-                    )}`}
+                    src={getImageUrl(selectedUser.profilePicture)}
                     alt="Profile"
                     className="w-28 h-28 rounded-full object-cover border-4 border-green-500 shadow-lg"
                     crossOrigin="anonymous"

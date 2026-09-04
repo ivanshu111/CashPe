@@ -4,9 +4,10 @@ import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import { deleteUserAccount } from "../services/api";
 import { logout } from "../slice/authSlice";
-import DeleteConfirmationModal from "../components/DeleteConfirmationModal"; // Import the new modal
-import toast from "react-hot-toast"; // Import toast
-import formatDate from "../utils/dateUtils"; // Import formatDate
+import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
+import toast from "react-hot-toast";
+import formatDate from "../utils/dateUtils";
+import { getImageUrl } from "../utils/imageUtils";
 
 const ProfilePage = () => {
   const { user } = useSelector((state) => state.auth);
@@ -73,10 +74,7 @@ const ProfilePage = () => {
           <div className="w-40 h-40 rounded-2xl overflow-hidden border border-gray-300 shadow-sm">
             {user.profilePicture ? (
               <img
-                src={`http://localhost:3000${user.profilePicture.replace(
-                  "/public",
-                  ""
-                )}`}
+                src={getImageUrl(user.profilePicture)}
                 alt="User Profile"
                 className="w-full h-full object-cover"
                 crossOrigin="anonymous"
