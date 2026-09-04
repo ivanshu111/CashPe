@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CashPe — System Design Diagrams</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --panel-2: #334155;
+    --border: #475569;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --green: #4ade80;
+    --yellow: #facc15;
+    --red: #f87171;
+    --purple: #c084fc;
+    --orange: #fb923c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem 1.5rem 4rem;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+  header h1 {
+    font-size: 2.2rem;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+  }
+  header p {
+    color: var(--muted);
+    margin-top: 0.4rem;
+  }
+  .toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+  }
+  .toc a {
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 0.85rem;
+  }
+  .toc a:hover { background: var(--panel-2); color: var(--accent); }
+
+  .section {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1.75rem 2rem;
+    margin: 0 auto 2.5rem;
+    max-width: 1200px;
+  }
+  .section h2 {
+    font-size: 1.4rem;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+  }
+  .section h3 {
+    color: var(--yellow);
+    margin: 1.5rem 0 1rem;
+    font-size: 1.05rem;
+  }
+  .sub { color: var(--muted); margin-bottom: 1rem; font-size: 0.9rem; }
+
+  .diagram {
+    background: var(--bg);
+    border: 1px dashed var(--border);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+  .diagram svg, .diagram .legend, .diagram .flex { display: block; min-width: min-content; }
+
+  /* Box styles */
+  .box {
+    background: var(--panel-2);
+    border: 2px solid var(--accent);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .box.small { font-size: 0.68rem; padding: 0.35rem 0.7rem; font-weight: 500; }
+  .box.green { border-color: var(--green); }
+  .box.yellow { border-color: var(--yellow); }
+  .box.red { border-color: var(--red); }
+  .box.purple { border-color: var(--purple); }
+  .box.orange { border-color: var(--orange); }
+  .box .tag {
+    display: block;
+    font-size: 0.6rem;
+    color: var(--muted);
+    font-weight: 400;
+    margin-bottom: 0.2rem;
+  }
+
+  .db {
+    background: var(--panel-2);
+    border: 2px solid var(--green);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1.2rem;
+    text-align: center;
+    position: relative;
+  }
+  .db::before, .db::after {
+    content: "";
+    position: absolute;
+    left: 0.6rem; right: 0.6rem;
+    border: 2px solid var(--green);
+    height: 0.7rem;
+    border-radius: 0 0 0.6rem 0.6rem;
+  }
+  .db::before { bottom: -0.65rem; }
+  .db::after { bottom: -1.2rem; }
+
+  .flex { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+  .flex.col { flex-direction: column; }
+  .gap-sm { gap: 0.5rem; }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 0.8rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .legend i {
+    display: inline-block;
+    width: 0.8rem; height: 0.8rem;
+    border-radius: 0.2rem;
+  }
+  .swatch-accent { background: var(--accent); }
+  .swatch-green { background: var(--green); }
+  .swatch-yellow { background: var(--yellow); }
+  .swatch-red { background: var(--red); }
+  .swatch-purple { background: var(--purple); }
+  .swatch-orange { background: var(--orange); }
+
+  .conn { font-size: 1.4rem; color: var(--accent); white-space: nowrap; }
+  .conn.inline { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    margin: 1rem 0;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.55rem 0.8rem;
+    text-align: left;
+  }
+  th { background: var(--panel-2); color: var(--accent); font-weight: 600; }
+  tr:nth-child(even) td { background: rgba(51,65,85,0.35); }
+
+  code {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 0.3rem;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.78rem;
+    color: var(--yellow);
+  }
+  .pill {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 1px solid;
+  }
+  .pill.pub   { color: var(--green); border-color: var(--green); }
+  .pill.auth  { color: var(--accent); border-color: var(--accent); }
+  .pill.admin { color: var(--red); border-color: var(--red); }
+  .pill.pin   { color: var(--orange); border-color: var(--orange); }
+
+  .note {
+    background: rgba(56,189,248,0.08);
+    border-left: 3px solid var(--accent);
+    padding: 0.6rem 1rem;
+    border-radius: 0 0.4rem 0.4rem 0;
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin: 1rem 0;
+  }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    padding-top: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CashPe — System Design Diagram</h1>
+  <p>Digital Wallet · Expense Tracker · Real-Time Notifications</p>
+</header>
+
+<nav class="toc">
+  <a href="#arch">1. High-Level Architecture</a>
+  <a href="#data">2. Entity Relationship</a>
+  <a href="#schema">3. Data Model</a>
+  <a href="#backend">4. Backend Pipeline</a>
+  <a href="#routes">5. API Route Map</a>
+  <a href="#realtime">6. Real-Time Notifications</a>
+  <a href="#frontend">7. Frontend Architecture</a>
+  <a href="#authflow">8. Auth & State Flow</a>
+  <a href="#deploy">9. Deployment</a>
+  <a href="#expense">10. Expense Module</a>
+</nav>
+
+<!-- ============ 1. HIGH LEVEL ARCHITECTURE ============ -->
+<section class="section" id="arch">
+  <h2>1. High-Level Architecture</h2>
+  <p class="sub">Three-tier architecture: Presentation → Application → Data. Four containerized services.</p>
+
+  <div class="diagram">
+    <div class="flex col">
+      <!-- Clients -->
+      <div class="flex gap-sm">
+        <div class="box purple">Web Client<br><span class="tag">React SPA</span></div>
+      </div>
+      <div class="conn">│ HTTPS / WSS</div>
+
+      <!-- Frontend tier -->
+      <div class="box"><div style="display:flex;align-items:center;gap:0.3rem">🌐 <span>Frontend — React 19 SPA (Vercel / Nginx)</span></div></div>
+      <div class="conn">│ REST API + Socket.IO</div>
+
+      <!-- Backend tier -->
+      <div class="box green">⚙️ Backend — Express.js API (Render / Docker)<br><span class="tag">JWT Auth · Validation · Swagger Docs</span></div>
+
+      <!-- Data tier -->
+      <div class="flex" style="margin-top:0.3rem; align-items:flex-start;">
+        <div class="flex col gap-sm">
+          <div class="db">MongoDB 7<br><span class="tag" style="font-size:0.62rem">Atlas / Container</span></div>
+          <div class="conn inline">primary store</div>
+        </div>
+        <div class="conn">◄───►</div>
+        <div class="flex col gap-sm">
+          <div class="box yellow">Redis 7<br><span class="tag">pub/sub + Socket adapter</span></div>
+          <div class="conn inline">notification bus</div>
+        </div>
+        <div class="conn">◄───►</div>
+        <div class="flex col gap-sm">
+          <div class="box orange">Socket.IO Server<br><span class="tag">Redis adapter</span></div>
+          <div class="conn inline">real-time events</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><i class="swatch-accent"></i> Backend services</span>
+    <span><i class="swatch-green"></i> Database</span>
+    <span><i class="swatch-yellow"></i> Cache / Broker</span>
+    <span><i class="swatch-red"></i> Auth boundary</span>
+    <span><i class="swatch-purple"></i> Client</span>
+    <span><i class="swatch-orange"></i> Realtime</span>
+  </div>
+
+  <h3>Request Lifecycle</h3>
+  <div class="diagram">
+    <div class="flex" style="justify-content:flex-start;">
+      <div class="box small">Browser</div>
+      <span class="conn">→</span>
+      <div class="box small">Vercel CDN</div>
+      <span class="conn">→</span>
+      <div class="box small">Proxy / HTTPS</div>
+      <span class="conn">→</span>
+      <div class="box small yellow">Rate Limiter</div>
+      <span class="conn">→</span>
+      <div class="box small">Helmet</div>
+      <span class="conn">→</span>
+      <div class="box small">CORS</div>
+      <span class="conn">→</span>
+      <div class="box small">Routes</div>
+      <span class="conn">→</span>
+      <div class="box small red">JWT Auth</div>
+      <span class="conn">→</span>
+      <div class="box small green">Controller</div>
+      <span class="conn">→</span>
+      <div class="db" style="display:inline-block; vertical-align:middle; padding:0.25rem 0.7rem;">MongoDB</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. ENTITY RELATIONSHIP ============ -->
+<section class="section" id="data">
+  <h2>2. Entity Relationship Diagram</h2>
+  <p class="sub">Six MongoDB collections. Users own wallets, transactions, categories, expenses, budgets and notifications.</p>
+
+  <div class="diagram">
+    <div class="flex col" style="align-items:stretch; gap:1.4rem;">
+
+      <div class="flex">
+        <div class="box red" style="padding:0.8rem 1.4rem">
+          <b>USER</b><br>
+          <span class="tag">role · status · pin · profilePicture</span>
+        </div>
+        <div class="flex col" style="gap:0">
+          <div class="conn inline">1 ── owns ── 1</div>
+        </div>
+        <div class="db">WALLET<br><span class="tag">balance</span></div>
+        <div class="flex col" style="gap:0">
+          <div class="conn inline">1 ── has ── N</div>
+        </div>
+        <div class="box green">TRANSACTION<br><span class="tag">type · amount · fromUser · toUser · status</span></div>
+      </div>
+
+      <div class="flex">
+        <div class="box red" style="padding:0.8rem 1.4rem">
+          <b>USER</b><br>
+          <span class="tag">role · status · pin · profilePicture</span>
+        </div>
+        <div class="flex col" style="gap:0">
+          <div class="conn inline">1 ── creates ── N</div>
+        </div>
+        <div class="box purple">CATEGORY<br><span class="tag">name · userId (global optional)</span></div>
+        <div class="flex col" style="gap:0">
+          <div class="conn inline">1 ── N</div>
+        </div>
+        <div class="box green">EXPENSE<br><span class="tag">categoryId · amount · date · month · year</span></div>
+      </div>
+
+      <div class="flex">
+        <div class="box red" style="padding:0.8rem 1.4rem">
+          <b>USER</b><br>
+          <span class="tag">role · status · pin · profilePicture</span>
+        </div>
+        <div class="flex col" style="gap:0">
+          <div class="conn inline">1 ── sets ── N</div>
+        </div>
+        <div class="box yellow">BUDGET<br><span class="tag">amount · month · year (unique per user+month)</span></div>
+        <div class="flex col" style="gap:0">
+          <div class="conn inline">1 ── receives ── N</div>
+        </div>
+        <div class="box orange">NOTIFICATION<br><span class="tag">message · read · userId</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="note">Cardinality summary: <code>User 1:1 Wallet</code> · <code>User 1:N Transaction</code> · <code>User 1:N Category</code> · <code>Category 1:N Expense</code> · <code>User 1:N Notification</code> · <code>User 1:N Budget (unique per month)</code>.</div>
+</section>
+
+<!-- ============ 3. DATA MODEL ============ -->
+<section class="section" id="schema">
+  <h2>3. Data Model — Field Reference</h2>
+
+  <h3>User — <code>src/models/User.js</code></h3>
+  <table>
+    <tr><th>Field</th><th>Type</th><th>Constraints</th></tr>
+    <tr><td>name</td><td>String</td><td>required, 3–50 chars</td></tr>
+    <tr><td>email</td><td>String</td><td>required, unique, lowercase, regex validated</td></tr>
+    <tr><td>password</td><td>String</td><td>required, min 6, bcrypt hashed</td></tr>
+    <tr><td>phone</td><td>String</td><td>required, unique, exactly 10 digits</td></tr>
+    <tr><td>role</td><td>String</td><td>enum [user, admin], default user</td></tr>
+    <tr><td>status</td><td>String</td><td>enum [active, inactive]</td></tr>
+    <tr><td>pin</td><td>String</td><td>optional, bcrypt hashed</td></tr>
+    <tr><td>profilePicture</td><td>String</td><td>default placeholder URL</td></tr>
+  </table>
+
+  <h3>Wallet — <code>src/models/Wallet.js</code></h3>
+  <table>
+    <tr><th>Field</th><th>Type</th><th>Constraints</th></tr>
+    <tr><td>user</td><td>ObjectId (ref User)</td><td>required, unique</td></tr>
+    <tr><td>balance</td><td>Number</td><td>required, default 0</td></tr>
+  </table>
+
+  <h3>Transaction — <code>src/models/Transaction.js</code></h3>
+  <table>
+    <tr><th>Field</th><th>Type</th><th>Constraints</th></tr>
+    <tr><td>wallet</td><td>ObjectId (ref Wallet)</td><td>required</td></tr>
+    <tr><td>type</td><td>String</td><td>enum [credit, debit]</td></tr>
+    <tr><td>amount</td><td>Number</td><td>required</td></tr>
+    <tr><td>fromUser</td><td>ObjectId (ref User)</td><td>indexed</td></tr>
+    <tr><td>toUser</td><td>ObjectId (ref User)</td><td>indexed</td></tr>
+    <tr><td>status</td><td>String</td><td>enum [pending, completed, failed]</td></tr>
+  </table>
+
+  <h3>Expense — <code>src/models/Expense.js</code></h3>
+  <table>
+    <tr><th>Field</th><th>Type</th><th>Constraints</th></tr>
+    <tr><td>userId</td><td>ObjectId (ref User)</td><td>required</td></tr>
+    <tr><td>categoryId</td><td>ObjectId (ref Category)</td><td>required</td></tr>
+    <tr><td>amount</td><td>Number</td><td>required, min 0.01</td></tr>
+    <tr><td>description</td><td>String</td><td>optional, trimmed</td></tr>
+    <tr><td>date</td><td>Date</td><td>required</td></tr>
+    <tr><td>month / year</td><td>Number</td><td>auto-extracted via pre-save hook</td></tr>
+  </table>
+
+  <h3>Budget — <code>src/models/Budget.js</code></h3>
+  <table>
+    <tr><th>Field</th><th>Type</th><th>Constraints</th></tr>
+    <tr><td>userId</td><td>ObjectId (ref User)</td><td>required</td></tr>
+    <tr><td>amount</td><td>Number</td><td>required, min 0</td></tr>
+    <tr><td>month</td><td>Number</td><td>required, 1–12</td></tr>
+    <tr><td>year</td><td>Number</td><td>required</td></tr>
+    <tr><td colspan="2">index</td><td>unique compound (userId, month, year)</td></tr>
+  </table>
+
+  <h3>Category — <code>src/models/Category.js</code></h3>
+  <table>
+    <tr><th>Field</th><th>Type</th><th>Constraints</th></tr>
+    <tr><td>name</td><td>String</td><td>required, trimmed</td></tr>
+    <tr><td>userId</td><td>ObjectId (ref User)</td><td>optional — global categories when absent</td></tr>
+    <tr><td colspan="2">index</td><td>unique compound (name, userId)</td></tr>
+  </table>
+</section>
+
+<!-- ============ 4. BACKEND PIPELINE ============ -->
+<section class="section" id="backend">
+  <h2>4. Backend Middleware Pipeline</h2>
+  <p class="sub">Every request traverses the global chain, then route-specific guards before reaching a controller.</p>
+
+  <div class="diagram">
+    <div class="flex col" style="gap:0.9rem;">
+      <div class="conn inline" style="font-size:0.9rem; color:var(--accent)">▼ REQUEST</div>
+      <div class="box orange small">Rate Limiter — 100 req / 15 min per IP</div>
+      <div class="conn">▼</div>
+      <div class="box green small">Helmet — security HTTP headers</div>
+      <div class="conn">▼</div>
+      <div class="box green small">CORS — origin whitelist</div>
+      <div class="conn">▼</div>
+      <div class="box green small">express.json() — body parsing</div>
+      <div class="conn">▼</div>
+      <div class="box purple small">Router — /api/* groups</div>
+      <div class="conn">▼</div>
+      <div class="box red small">auth.js — JWT verify + req.user</div>
+      <div class="conn">▼</div>
+      <div class="box red small">adminAuth — role check (admin only)</div>
+      <div class="conn">▼</div>
+      <div class="box yellow small">verifyPin — PIN for sensitive ops</div>
+      <div class="conn">▼</div>
+      <div class="box" style="border-color:var(--accent)">Controller — business logic</div>
+      <div class="conn inline" style="color:var(--green); font-size:0.9rem">▲ RESPONSE (JSON)</div>
+    </div>
+  </div>
+
+  <h3>Backend Directory Structure</h3>
+  <div class="diagram">
+    <pre style="font-size:0.78rem; line-height:1.6; color:var(--text); white-space:pre;">backend/
+├── src/
+│   ├── config/
+│   │   ├── db.js              # Mongoose connection
+│   │   └── swagger.js         # OpenAPI spec
+│   ├── controllers/           # 9 controllers
+│   │   ├── authController.js
+│   │   ├── walletController.js
+│   │   ├── userController.js
+│   │   ├── adminController.js
+│   │   ├── expenseController.js
+│   │   ├── budgetController.js
+│   │   ├── categoryController.js
+│   │   ├── notificationController.js
+│   │   └── reportController.js
+│   ├── middlewares/
+│   │   ├── auth.js            # JWT guard
+│   │   ├── adminAuth.js       # role guard
+│   │   ├── verifyPin.js       # PIN guard
+│   │   └── upload.js          # Multer
+│   ├── models/                # 6 Mongoose schemas
+│   ├── routes/                # 9 route groups
+│   ├── service/
+│   │   ├── redisManager.js    # pub/sub channel
+│   │   └── socketManager.js   # Socket.IO + adapter
+│   ├── utils/
+│   │   ├── jwt.js             # sign / verify
+│   │   └── hash.js            # bcrypt
+│   └── app.js                 # bootstrap
+├── public/uploads/            # profile pictures
+├── seed.js                    # admin seeder
+└── Dockerfile</pre>
+  </div>
+</section>
+
+<!-- ============ 5. API ROUTE MAP ============ -->
+<section class="section" id="routes">
+  <h2>5. API Route Map</h2>
+
+  <table>
+    <tr>
+      <th>Route Group</th><th>Base Path</th><th>Endpoints</th><th>Access</th>
+    </tr>
+    <tr>
+      <td><b>Auth</b></td><td><code>/api/auth</code></td>
+      <td>POST register · POST login · PATCH profile · GET history</td>
+      <td><span class="pill pub">Public</span> / <span class="pill auth">Auth</span></td>
+    </tr>
+    <tr>
+      <td><b>Wallet</b></td><td><code>/api/wallet</code></td>
+      <td>GET details · POST add-money · POST send-money</td>
+      <td><span class="pill auth">Auth</span> + <span class="pill pin">PIN</span></td>
+    </tr>
+    <tr>
+      <td><b>Users</b></td><td><code>/api/users</code></td>
+      <td>GET find · DELETE account</td>
+      <td><span class="pill auth">Auth</span></td>
+    </tr>
+    <tr>
+      <td><b>Admin</b></td><td><code>/api/admin</code></td>
+      <td>GET users · GET transactions · PUT users/:id/status · GET users/:id/details</td>
+      <td><span class="pill admin">Admin</span></td>
+    </tr>
+    <tr>
+      <td><b>Notifications</b></td><td><code>/api/notifications</code></td>
+      <td>GET (user's notifications)</td>
+      <td><span class="pill auth">Auth</span></td>
+    </tr>
+    <tr>
+      <td><b>Expenses</b></td><td><code>/api/expenses</code></td>
+      <td>GET · POST · PUT :id · DELETE :id</td>
+      <td><span class="pill auth">Auth</span></td>
+    </tr>
+    <tr>
+      <td><b>Budgets</b></td><td><code>/api/budget</code></td>
+      <td>GET :year/:month · POST · PUT :id</td>
+      <td><span class="pill auth">Auth</span></td>
+    </tr>
+    <tr>
+      <td><b>Categories</b></td><td><code>/api/categories</code></td>
+      <td>GET · POST · PUT :id · DELETE :id</td>
+      <td><span class="pill auth">Auth</span></td>
+    </tr>
+    <tr>
+      <td><b>Reports</b></td><td><code>/api/reports</code></td>
+      <td>GET monthly/:year/:month · GET yearly/:year</td>
+      <td><span class="pill auth">Auth</span></td>
+    </tr>
+  </table>
+
+  <h3>Route → Processing → Storage</h3>
+  <div class="diagram">
+    <div class="flex" style="justify-content:flex-start;">
+      <div class="box small">Request</div>
+      <span class="conn">→</span>
+      <div class="box small">URL Route</div>
+      <span class="conn">→</span>
+      <div class="box small red">Validator</div>
+      <span class="conn">→</span>
+      <div class="box small red">Guard(s)</div>
+      <span class="conn">→</span>
+      <div class="box small">Controller</div>
+      <span class="conn">→</span>
+      <div class="box small purple">Service</div>
+      <span class="conn">→</span>
+      <div class="box small green" style="display:inline-block;">MongoDB</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. REAL-TIME NOTIFICATIONS ============ -->
+<section class="section" id="realtime">
+  <h2>6. Real-Time Notification Flow</h2>
+  <p class="sub">Redis decouples producers from consumers, letting multiple backend instances share one notification bus.</p>
+
+  <div class="diagram">
+    <div class="flex col" style="gap:0.9rem;">
+      <div class="box" style="border-color:var(--green)">Controller Action<br><span class="tag">e.g. send-money succeeds</span></div>
+      <div class="conn">▼</div>
+      <div class="box yellow">publishNotification()<br><span class="tag">Redis PUBLISHER</span></div>
+      <div class="conn">▼</div>
+      <div class="flex">
+        <div class="box orange small">Redis CHANNEL "notifications"</div>
+      </div>
+      <div class="conn">▼</div>
+      <div class="box yellow">Redis SUBSCRIBER <span class="tag" style="font-size:0.6rem">(app.js message handler)</span></div>
+      <div class="conn">▼</div>
+      <div class="box orange">emitNotificationToUser()<br><span class="tag">Socket.IO server</span></div>
+      <div class="conn">▼</div>
+      <div class="box" style="border-color:var(--purple)">io.to(userId).emit("new_notification")</div>
+      <div class="conn">▼</div>
+      <div class="box purple">Browser Client<br><span class="tag">socketService.js listener</span></div>
+      <div class="conn">▼</div>
+      <div class="box">Redux notificationSlice update</div>
+      <div class="conn">▼</div>
+      <div class="box" style="border-color:var(--yellow)">React Hot Toast popup</div>
+    </div>
+  </div>
+
+  <div class="note"><b>Why Redis?</b> The Socket.IO Redis adapter lets a user's WebSocket be reachable from any backend instance; the pub/sub channel fans notifications out across instances — enabling horizontal scaling.</div>
+</section>
+
+<!-- ============ 7. FRONTEND ARCHITECTURE ============ -->
+<section class="section" id="frontend">
+  <h2>7. Frontend Architecture</h2>
+
+  <div class="diagram">
+    <div class="flex" style="align-items:stretch;">
+      <div class="flex col" style="gap:0.3rem; align-items:stretch;">
+        <div class="box purple">React 19 SPA</div>
+        <div class="flex" style="gap:0.4rem; flex-wrap:wrap;">
+          <div class="box small">Components</div>
+          <div class="box small">Pages</div>
+          <div class="box small">Routers</div>
+          <div class="box small">Utils</div>
+        </div>
+      </div>
+      <div class="conn">⇄</div>
+      <div class="flex col" style="gap:0.3rem; align-items:stretch;">
+        <div class="box green">Redux Store (Redux Toolkit)</div>
+        <div class="flex" style="gap:0.4rem; flex-wrap:wrap;">
+          <div class="box small green">authSlice</div>
+          <div class="box small green">expenseSlice</div>
+          <div class="box small green">budgetSlice</div>
+          <div class="box small green">categorySlice</div>
+          <div class="box small green">notificationSlice</div>
+        </div>
+      </div>
+      <div class="conn">⇄</div>
+      <div class="flex col" style="gap:0.3rem; align-items:stretch;">
+        <div class="box orange">Services</div>
+        <div class="flex" style="gap:0.4rem; flex-wrap:wrap;">
+          <div class="box small orange">api.js<br><span class="tag">Axios interceptors</span></div>
+          <div class="box small orange">socketService.js<br><span class="tag">Socket.IO client</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Client-Side Routing (React Router)</h3>
+  <table>
+    <tr><th>Path</th><th>Component</th><th>Guard</th></tr>
+    <tr><td>/</td><td>HomePage</td><td>Public</td></tr>
+    <tr><td>/register · /login · /about</td><td>Register / Login / About</td><td>Public</td></tr>
+    <tr><td>/dashboard</td><td>DashboardPage</td><td><span class="pill auth">Protected</span></td></tr>
+    <tr><td>/add-money</td><td>AddMoneyPage</td><td><span class="pill pin">PIN</span></td></tr>
+    <tr><td>/send-money</td><td>SendMoneyPage</td><td><span class="pill pin">PIN</span></td></tr>
+    <tr><td>/profile · /profile/edit</td><td>ProfilePage / EditProfilePage</td><td><span class="pill auth">Protected</span></td></tr>
+    <tr><td>/admin</td><td>AdminPage</td><td><span class="pill admin">Admin</span></td></tr>
+    <tr><td>/admin/users/:id/transactions</td><td>UserTransactionsPage</td><td><span class="pill admin">Admin</span></td></tr>
+    <tr><td>/expense-tracker-home</td><td>ExpenseTrackerHomePage</td><td><span class="pill auth">Protected</span></td></tr>
+    <tr><td>/reports</td><td>ReportPage</td><td><span class="pill auth">Protected</span></td></tr>
+  </table>
+</section>
+
+<!-- ============ 8. AUTH & STATE FLOW ============ -->
+<section class="section" id="authflow">
+  <h2>8. Authentication & Session Flow</h2>
+
+  <div class="diagram">
+    <div class="flex col" style="gap:0.9rem;">
+      <div class="box purple">Login Form</div>
+      <div class="conn">▼</div>
+      <div class="box orange">POST /api/auth/login</div>
+      <div class="conn">▼</div>
+      <div class="box green">Backend: verify credentials</div>
+      <div class="conn">▼</div>
+      <div class="box yellow">Issue JWT (userId + role)</div>
+      <div class="conn">▼</div>
+      <div class="flex" style="gap:1.5rem;">
+        <div class="box small green">authSlice stores token + user</div>
+        <div class="box small purple">Axios interceptor → Bearer header</div>
+      </div>
+      <div class="conn">▼</div>
+      <div class="box red">401 response → auto-logout → redirect /</div>
+    </div>
+  </div>
+
+  <h3>State / Action Flow (Redux)</h3>
+  <div class="diagram">
+    <div class="flex" style="justify-content:flex-start;">
+      <div class="box small purple">UI Event</div>
+      <span class="conn">→</span>
+      <div class="box small yellow">dispatch(action)</div>
+      <span class="conn">→</span>
+      <div class="box small orange">async thunk → api.js</div>
+      <span class="conn">→</span>
+      <div class="box small green"> slice reducers</div>
+      <span class="conn">→</span>
+      <div class="box small">store → UI re-render</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9. DEPLOYMENT ============ -->
+<section class="section" id="deploy">
+  <h2>9. Deployment Architecture</h2>
+
+  <h3>9.1 Docker Compose (Local)</h3>
+  <div class="diagram">
+    <div class="flex" style="align-items:stretch;">
+      <div class="flex col gap-sm">
+        <div class="box small green">mongo:7</div>
+        <div class="conn inline">:27017</div>
+      </div>
+      <div class="flex col gap-sm">
+        <div class="box small yellow">redis:7</div>
+        <div class="conn inline">:6379</div>
+      </div>
+      <div class="flex col gap-sm">
+        <div class="box small">backend</div>
+        <div class="conn inline">:3000</div>
+      </div>
+      <div class="flex col gap-sm">
+        <div class="box small purple">frontend</div>
+        <div class="conn inline">:80</div>
+      </div>
+    </div>
+    <div class="legend" style="margin-top:1rem;">
+      volumes: mongo_data · redis_data · uploads_data
+    </div>
+  </div>
+
+  <h3>9.2 Production (Cloud)</h3>
+  <div class="diagram">
+    <div class="flex col" style="gap:0.9rem;">
+      <div class="box purple">Vercel — Frontend SPA<br><span class="tag">static assets · auto-deploy from Git</span></div>
+      <div class="conn">▼ HTTPS</div>
+      <div class="box green">Render — Backend API<br><span class="tag">Express + Socket.IO · auto-deploy from Git</span></div>
+      <div class="flex" style="gap:1.5rem; margin-top:0.5rem;">
+        <div class="db">MongoDB Atlas<br><span class="tag">managed · auto-backup</span></div>
+        <div class="box yellow">Upstash Redis<br><span class="tag">serverless pub/sub</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>9.3 Environment Variables</h3>
+  <table>
+    <tr><th>Variable</th><th>Service</th><th>Purpose</th></tr>
+    <tr><td>PORT</td><td>Backend</td><td>Listen port</td></tr>
+    <tr><td>MONGODB_URI</td><td>Backend</td><td>MongoDB connection string</td></tr>
+    <tr><td>REDIS_URI</td><td>Backend</td><td>Redis connection string</td></tr>
+    <tr><td>JWT_SECRET</td><td>Backend</td><td>Token signing secret</td></tr>
+    <tr><td>FRONTEND_URL</td><td>Backend</td><td>CORS origin whitelist</td></tr>
+    <tr><td>VITE_API_URL</td><td>Frontend</td><td>Backend base URL (Vite)</td></tr>
+  </table>
+</section>
+
+<!-- ============ 10. EXPENSE MODULE ============ -->
+<section class="section" id="expense">
+  <h2>10. Expense Tracker Module — Data Flow</h2>
+
+  <div class="diagram">
+    <div class="flex col" style="gap:0.9rem;">
+      <div class="box yellow">Set Monthly Budget<br><span class="tag">Budget { userId, month, year, amount }</span></div>
+      <div class="conn">▼</div>
+      <div class="box green">Log Expense<br><span class="tag">Expense { categoryId, amount, date } → auto month/year</span></div>
+      <div class="conn">▼</div>
+      <div class="box">Report Engine<br><span class="tag">sum by month/year · category breakdown · compare vs budget</span></div>
+      <div class="conn">▼</div>
+      <div class="box red">Budget Overrun?<br><span class="tag">→ Notification via Redis + Socket.IO → toast</span></div>
+    </div>
+  </div>
+
+  <h3>Report Endpoints</h3>
+  <table>
+    <tr><th>Endpoint</th><th>Output</th></tr>
+    <tr><td>GET /api/reports/monthly/:year/:month</td><td>Total spend, expense list, category breakdown</td></tr>
+    <tr><td>GET /api/reports/yearly/:year</td><td>Monthly aggregated totals</td></tr>
+  </table>
+</section>
+
+<footer>
+  CashPe v1.0 — System Design Diagrams · Author: Ivanshu Pratap Singh
+</footer>
+
+</body>
+</html>
