@@ -9,7 +9,7 @@ export const fetchCategories = createAsyncThunk(
       const response = await api.get("/categories");
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: error.message || "Network error" });
     }
   }
 );
@@ -21,7 +21,7 @@ export const addCategory = createAsyncThunk(
       const response = await api.post("/categories", categoryData);
       return response.data.category; // Assuming API returns { message, category }
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: error.message || "Network error" });
     }
   }
 );
@@ -33,7 +33,7 @@ export const updateCategory = createAsyncThunk(
       const response = await api.put(`/categories/${id}`, categoryData);
       return response.data.category; // Assuming API returns { message, category }
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: error.message || "Network error" });
     }
   }
 );
@@ -45,7 +45,7 @@ export const deleteCategory = createAsyncThunk(
       await api.delete(`/categories/${id}`);
       return id; // Return the ID of the deleted category
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: error.message || "Network error" });
     }
   }
 );

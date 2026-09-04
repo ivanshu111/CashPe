@@ -13,7 +13,7 @@ export const fetchBudget = createAsyncThunk(
             if (error.response && error.response.status === 404) {
                 return null; // Indicate no budget for this month/year
             }
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: error.message || "Network error" });
         }
     }
 );
@@ -23,9 +23,9 @@ export const setBudget = createAsyncThunk(
     async (budgetData, { rejectWithValue }) => {
         try {
             const response = await api.post('/budget', budgetData);
-            return response.data.budget; // Assuming API returns { message, budget }
+            return response.data.budget;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: error.message || "Network error" });
         }
     }
 );
@@ -35,9 +35,9 @@ export const updateBudget = createAsyncThunk(
     async ({ id, budgetData }, { rejectWithValue }) => {
         try {
             const response = await api.put(`/budget/${id}`, budgetData);
-            return response.data.budget; // Assuming API returns { message, budget }
+            return response.data.budget;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: error.message || "Network error" });
         }
     }
 );

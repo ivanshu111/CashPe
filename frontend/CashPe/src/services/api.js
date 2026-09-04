@@ -1,7 +1,7 @@
 import axios from "axios";
 import store from "../store";
-import { logout } from "../slice/authSlice"; // Import logout action
-import toast from "react-hot-toast"; // Import toast for notifications
+import { logout } from "../slice/authSlice";
+import toast from "react-hot-toast";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api`
@@ -17,7 +17,6 @@ export const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = store.getState().auth.token;
-
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
@@ -34,32 +33,36 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Unauthorized, token might be expired or invalid
-      store.dispatch(logout()); // Dispatch logout action
+      store.dispatch(logout());
       toast.error("Session expired or unauthorized. Please log in again.");
-      window.location.href = "/"; // Redirect to home/login page
+      window.location.href = "/";
     }
     return Promise.reject(error);
   }
 );
 
+const handleError = (error) => {
+  if (error.response && error.response.data) {
+    throw error.response.data;
+  }
+  throw { message: error.message || "Network error. Please try again." };
+};
+
 export const login = async (email, password) => {
   try {
     const response = await api.post("/auth/login", { email, password });
-
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    handleError(error);
   }
 };
 
 export const getWalletDetails = async () => {
   try {
     const response = await api.get("/wallet/details");
-
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    handleError(error);
   }
 };
 
@@ -68,7 +71,7 @@ export const getWalletBalanceWithPin = async (pin) => {
     const response = await api.post("/wallet/balance", { pin });
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    handleError(error);
   }
 };
 
@@ -77,7 +80,7 @@ export const getTransactionHistory = async () => {
     const response = await api.get("/auth/history");
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    handleError(error);
   }
 };
 
@@ -86,7 +89,7 @@ export const addMoney = async (amount) => {
     const response = await api.post("/wallet/add-money", { amount });
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    handleError(error);
   }
 };
 
@@ -95,7 +98,7 @@ export const searchUsers = async (query) => {
     const response = await api.get("/users/find", { params: query });
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    handleError(error);
   }
 };
 
@@ -108,7 +111,7 @@ export const sendMoney = async (toUser, amount, pin) => {
     });
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    handleError(error);
   }
 };
 
@@ -121,17 +124,16 @@ export const updateUserProfile = async (formData) => {
     });
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    handleError(error);
   }
 };
 
-// Admin API calls
 export const getAllUsers = async () => {
   try {
     const response = await api.get("/admin/users");
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    handleError(error);
   }
 };
 
@@ -145,7 +147,7 @@ export const getAllTransactions = async (
     });
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    handleError(error);
   }
 };
 
@@ -154,7 +156,7 @@ export const updateUserStatus = async (userId, status) => {
     const response = await api.put(`/admin/users/${userId}/status`, { status });
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    handleError(error);
   }
 };
 
@@ -163,7 +165,7 @@ export const getUserDetails = async (userId) => {
     const response = await api.get(`/admin/users/${userId}/details`);
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    handleError(error);
   }
 };
 
@@ -172,7 +174,7 @@ export const deleteUserAccount = async () => {
     const response = await api.delete("/users");
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    handleError(error);
   }
 };
 
@@ -187,6 +189,6 @@ export const getUserTransactions = async (
     });
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    handleError(error);
   }
 };

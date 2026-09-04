@@ -10,7 +10,7 @@ export const fetchExpenses = createAsyncThunk(
       const response = await api.get(`/expenses?${query}`);
       return response.data; // Assuming API returns { expenses, totalPages, currentPage, totalItems }
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: error.message || "Network error" });
     }
   }
 );
@@ -22,7 +22,7 @@ export const addExpense = createAsyncThunk(
             const response = await api.post('/expenses', expenseData);
       return response.data.expense; // Assuming API returns { message, expense }
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: error.message || "Network error" });
     }
   }
 );
@@ -33,7 +33,7 @@ export const updateExpense = createAsyncThunk(
     try {
                   const response = await api.put(`/expenses/${id}`, expenseData);      return response.data.expense; // Assuming API returns { message, expense }
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: error.message || "Network error" });
     }
   }
 );
@@ -44,7 +44,7 @@ export const deleteExpense = createAsyncThunk(
     try {
                   await api.delete(`/expenses/${id}`);      return id; // Return the ID of the deleted expense
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: error.message || "Network error" });
     }
   }
 );
@@ -55,7 +55,7 @@ export const fetchMonthlySummary = createAsyncThunk(
     try {
                   const response = await api.get(`/reports/monthly/${year}/${month}`);      return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: error.message || "Network error" });
     }
   }
 );
@@ -66,7 +66,7 @@ export const fetchYearlySummary = createAsyncThunk(
     try {
                   const response = await api.get(`/reports/yearly/${year}`);      return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: error.message || "Network error" });
     }
   }
 );
