@@ -1,0 +1,53 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: cashpe-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:7-alpine
+    container_name: cashpe-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  backend:
+    build: ./backend
+    container_name: cashpe-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - MONGODB_URI=mongodb://mongo:27017/cashPe
+      - REDIS_URI=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-change_this_to_a_strong_secret}
+      - FRONTEND_URL=*
+    volumes:
+      - uploads_data:/app/public/uploads
+    depends_on:
+      - mongo
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend/CashPe
+      args:
+        VITE_API_URL: ""
+    container_name: cashpe-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
+  redis_data:
+  uploads_data:
