@@ -13,11 +13,13 @@ export const initSocket = (userId) => {
   // Get the token from the Redux store
   const token = store.getState().auth.token;
 
-  // Connect to the socket server
-  socket = io(import.meta.env.VITE_API_URL || "http://localhost:3000", {
+  const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
+
+  socket = io(API_URL, {
     auth: {
       token,
     },
+    transports: ["websocket", "polling"],
   });
 
   socket.on("connect", () => {

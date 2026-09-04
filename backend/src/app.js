@@ -24,7 +24,6 @@ const path = require("path");
 const helmet = require("helmet");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
-const fs = require("fs");
 const app = express();
 
 const server = http.createServer(app);
@@ -44,16 +43,7 @@ subscriber.on("message", (channel, message) => {
   }
 });
 
-let PORT = 3000;
-try {
-  const envFile = fs.readFileSync(".env", "utf8");
-  const portLine = envFile.split("\n").find((line) => line.startsWith("PORT="));
-  if (portLine) {
-    PORT = parseInt(portLine.split("=")[1].replace(";", "").trim(), 10);
-  }
-} catch (err) {
-  console.log("Could not read .env file, using default port 3000");
-}
+const PORT = process.env.PORT || 3000;
 
 // Rate limiting
 const limiter = rateLimit({
@@ -64,12 +54,16 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "*",
+  origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(",") : "*",
   credentials: true,
 }));
 app.use(express.json());
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
 
 app.use(express.static(path.join(__dirname, "..", "public")));
 

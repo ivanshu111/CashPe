@@ -7,7 +7,8 @@ let io;
 const initSocketManager = (server) => {
   io = new Server(server, {
     cors: {
-      origin: "*",
+      origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(",") : "*",
+      credentials: true,
     },
   });
 
